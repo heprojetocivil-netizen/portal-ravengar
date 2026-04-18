@@ -41,28 +41,6 @@ st.markdown(f"""
         margin-bottom: 20px;
     }}
 
-    /* Estilos para as Bolhas de Chat do Detetive */
-    .chat-bubble-user {{
-        background-color: #DCF8C6 !important;
-        padding: 15px;
-        border-radius: 15px 15px 0px 15px;
-        margin-bottom: 10px;
-        border: 1px solid #C7E1B0;
-        text-align: right;
-        margin-left: auto;
-        max-width: 80%;
-    }}
-    .chat-bubble-bot {{
-        background-color: #FFFFFF !important;
-        padding: 15px;
-        border-radius: 15px 15px 15px 0px;
-        margin-bottom: 10px;
-        border: 2px solid #FFD1DC;
-        text-align: left;
-        margin-right: auto;
-        max-width: 80%;
-    }}
-
     .biblioteca-card {{
         background-color: #FFFFFF !important;
         border: 1px solid #FFD1DC !important;
@@ -73,31 +51,41 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DE CONEXÃO (ADAPTADA PARA CHAT CONTÍNUO NO DETETIVE) ---
-def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
+# --- 2. LÓGICA DE CONEXÃO (PERSONALIZADA POR ESFERA) ---
+def consultar_ravengar(pergunta, api_key, setor="Destino"):
+    # Aqui personalizamos a "alma" do Ravengar para cada esfera
     prompts = {
-        "Amor": "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática.",
-        "Trabalho": "És o Ravengar, o Estrategista das Sombras. Tua linguagem é direta, fria e focada em poder.",
-        "Futuro": "És o Ravengar, o Profeta do Tempo. Tua linguagem é enigmática e mística.",
-        "Saude": "És o Ravengar, o Alquimista da Vitalidade. Tua linguagem é serena e curativa.",
-        "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. MANTÉM O CONTEXTO DAS PERGUNTAS ANTERIORES."
+        "Amor": (
+            "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática. "
+            "Falas sobre fios do destino, batimentos de coração e conexões de alma. "
+            "Teu tom é acolhedor, mas revelador sobre sentimentos ocultos."
+        ),
+        "Trabalho": (
+            "És o Ravengar, o Estrategista das Sombras. Tua linguagem é direta, fria e focada em poder e território. "
+            "Falas sobre movimentos de xadrez, colheita de esforços e a balança da justiça profissional. "
+            "Teu tom é assertivo e focado em resultados e ambição."
+        ),
+        "Futuro": (
+            "És o Ravengar, o Profeta do Tempo. Tua linguagem é enigmática, vasta e mística. "
+            "Falas sobre constelações, areias do tempo e o que está escrito no éter. "
+            "Teu tom é solene, avisando que o destino é uma estrada que se constrói ao caminhar."
+        ),
+        "Saude": (
+            "És o Ravengar, o Alquimista da Vitalidade. Tua linguagem é serena, focada em equilíbrio e fluxos de energia. "
+            "Falas sobre o templo interior, chakras e a harmonia entre o espírito e a matéria. "
+            "Teu tom é curativo e equilibrado."
+        ),
+        "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria."
     }
     
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
     sistema += f" Nome do consulente: {st.session_state.nome_user}."
 
-    # Se for o Detetive, enviamos o histórico completo para o modelo
-    mensagens = [{"role": "system", "content": sistema}]
-    if historico:
-        mensagens.extend(historico)
-    else:
-        mensagens.append({"role": "user", "content": pergunta})
-
     try:
         client = Groq(api_key=api_key)
         completion = client.chat.completions.create(
-            messages=mensagens,
+            messages=[{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
             model="llama-3.3-70b-versatile",
         )
         return completion.choices[0].message.content
@@ -163,37 +151,16 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 3: DETETIVE VIRTUAL (CHAT CONTÍNUO ESTILO WHATSAPP) ---
+    # --- ABA 3: DETETIVE VIRTUAL ---
     with tabs[2]:
-        if 'detetive_msgs' not in st.session_state:
-            st.session_state.detetive_msgs = []
-
-        # Área de histórico de mensagens
-        for msg in st.session_state.detetive_msgs:
-            if msg["role"] == "user":
-                st.markdown(f"<div class='chat-bubble-user'><b>Você:</b><br>{msg['content']}</div>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<div class='chat-bubble-bot'><b>🕵️ Ravengar:</b><br>{msg['content']}</div>", unsafe_allow_html=True)
-
-        # Entrada de texto
-        pergunta_det = st.text_input("Investigue o comportamento ou faça uma pergunta sobre o alvo:", key="input_detetive_cont")
-        
-        col_env, col_res = st.columns([4, 1])
-        with col_env:
-            if st.button("ENVIAR INVESTIGAÇÃO 🔍"):
-                if chave_api and pergunta_det:
-                    # Adiciona pergunta do usuário ao histórico
-                    st.session_state.detetive_msgs.append({"role": "user", "content": pergunta_det})
-                    # Consulta enviando o histórico
-                    resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.detetive_msgs)
-                    # Adiciona resposta do bot ao histórico
-                    st.session_state.detetive_msgs.append({"role": "assistant", "content": resposta})
-                    st.rerun()
-        
-        with col_res:
-            if st.button("🗑️ RESET"):
-                st.session_state.detetive_msgs = []
-                st.rerun()
+        nome_alvo = st.text_input("Quem vamos investigar?")
+        comp = st.text_area("Descreve o comportamento:")
+        if st.button("INICIAR INVESTIGAÇÃO"):
+            if chave_api and comp:
+                st.session_state['chat_det'] = [{"content": consultar_ravengar(f"Investigar {nome_alvo}: {comp}", chave_api, "Detetive")}]
+        if 'chat_det' in st.session_state:
+            for msg in st.session_state['chat_det']:
+                st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
     # --- ABA 4: QUIZ PSICOLÓGICO ---
     with tabs[3]:
