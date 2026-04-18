@@ -4,25 +4,21 @@ from groq import Groq
 # --- 1. CONFIGURAÇÃO E ESTILO ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
-st.markdown("""
+# Lógica de CSS Dinâmico para destacar a esfera selecionada
+setor_ativo = st.session_state.get('setor', '')
+
+st.markdown(f"""
     <style>
-    header {visibility: hidden;}
-    .stApp { background-color: #F7F7F7 !important; }
+    header {{visibility: hidden;}}
+    .stApp {{ background-color: #F7F7F7 !important; }}
     
-    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {
+    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         color: #000000 !important;
-    }
+    }}
 
-    .quiz-pergunta {
-        font-size: 28px !important;
-        font-weight: 600 !important;
-        text-align: left !important;
-        margin-bottom: 35px !important;
-        line-height: 1.4;
-    }
-    
-    div.stButton > button, div.stFormSubmitButton > button {
+    /* Estilo padrão dos botões de esfera */
+    .stButton > button {{
         background-color: #FFD1DC !important;
         color: #000000 !important;
         font-weight: bold !important;
@@ -30,10 +26,16 @@ st.markdown("""
         border-radius: 12px !important;
         width: 100%;
         height: 50px;
-        font-size: 18px !important;
-    }
-    
-    .ravengar-card {
+        transition: all 0.3s ease;
+    }}
+
+    /* Destaque para a esfera selecionada */
+    button[key*="Amor"] {{ background-color: { "#FFB2C1" if setor_ativo == "Amor" else "#FFD1DC" } !important; border: { "2px solid #FF69B4" if setor_ativo == "Amor" else "1px solid #FFB7C5" } !important; }}
+    button[key*="Trabalho"] {{ background-color: { "#FFB2C1" if setor_ativo == "Trabalho" else "#FFD1DC" } !important; border: { "2px solid #FF69B4" if setor_ativo == "Trabalho" else "1px solid #FFB7C5" } !important; }}
+    button[key*="Futuro"] {{ background-color: { "#FFB2C1" if setor_ativo == "Futuro" else "#FFD1DC" } !important; border: { "2px solid #FF69B4" if setor_ativo == "Futuro" else "1px solid #FFB7C5" } !important; }}
+    button[key*="Saude"] {{ background-color: { "#FFB2C1" if setor_ativo == "Saude" else "#FFD1DC" } !important; border: { "2px solid #FF69B4" if setor_ativo == "Saude" else "1px solid #FFB7C5" } !important; }}
+
+    .ravengar-card {{
         background-color: #FFFFFF !important;
         border: 2px solid #FFD1DC !important;
         padding: 25px;
@@ -41,9 +43,9 @@ st.markdown("""
         box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
         line-height: 1.6;
         font-size: 17px !important;
-    }
+    }}
 
-    .veredito-card {
+    .veredito-card {{
         background-color: #FFFFFF !important;
         border: 2px solid #FFD1DC !important;
         padding: 30px;
@@ -51,15 +53,14 @@ st.markdown("""
         box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
         line-height: 1.8;
         font-size: 22px !important;
-        font-weight: 500 !important;
-    }
+    }}
 
-    .saudacao-texto {
+    .saudacao-texto {{
         text-align: center;
         font-size: 20px !important;
         color: #555555 !important;
         margin-bottom: 30px !important;
-    }
+    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -100,33 +101,41 @@ if not st.session_state.usuario_identificado:
         else:
             st.error("O Oráculo precisa de um nome para abrir os portões.")
 
-# --- 5. INTERFACE PRINCIPAL (SÓ APARECE APÓS IDENTIFICAÇÃO) ---
+# --- 5. INTERFACE PRINCIPAL ---
 else:
     st.markdown("<h1 style='text-align: center; margin-bottom: 0px;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
-    
-    # Saudação personalizada conforme o gênero
     saudacao = "Seja muito bem-vindo" if st.session_state.genero_user == "Masculino" else "Seja muito bem-vinda"
     st.markdown(f"<p class='saudacao-texto'>{saudacao}, <b>{st.session_state.nome_user}</b>.</p>", unsafe_allow_html=True)
 
     tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
 
-    # --- ABA 1: ORÁCULO ---
+    # --- ABA 1: ORÁCULO COM BOTÕES PERSISTENTES ---
     with tab1:
         st.markdown("### Escolha sua Esfera")
         c1, c2, c3, c4 = st.columns(4)
         with c1: 
-            if st.button("❤️ AMOR"): st.session_state.setor = "Amor"
+            if st.button("❤️ AMOR", key="btn_Amor"): 
+                st.session_state.setor = "Amor"
+                st.rerun()
         with c2: 
-            if st.button("💼 TRABALHO"): st.session_state.setor = "Trabalho"
+            if st.button("💼 TRABALHO", key="btn_Trabalho"): 
+                st.session_state.setor = "Trabalho"
+                st.rerun()
         with c3: 
-            if st.button("✨ FUTURO"): st.session_state.setor = "Futuro"
+            if st.button("✨ FUTURO", key="btn_Futuro"): 
+                st.session_state.setor = "Futuro"
+                st.rerun()
         with c4: 
-            if st.button("🌿 SAÚDE"): st.session_state.setor = "Saúde"
+            if st.button("🌿 SAÚDE", key="btn_Saude"): 
+                st.session_state.setor = "Saude"
+                st.rerun()
         
         setor = st.session_state.get('setor', 'Destino')
+        st.info(f"Esfera ativa: **{setor.upper()}**")
+        
         pergunta_ora = st.text_area(f"O que deseja saber sobre o seu {setor}?", key="ora_input")
         
-        if st.button("PROFERIR VEREDITO", key="btn_ora"):
+        if st.button("PROFERIR VEREDITO", key="btn_main_ora"):
             if chave_api and pergunta_ora:
                 res = consultar_ravengar(f"Você é o Ravengar. Responda a {st.session_state.nome_user} sobre {setor}.", pergunta_ora, chave_api)
                 st.session_state['chat_ora'] = [{"role": "ravengar", "content": res}]
@@ -172,7 +181,7 @@ else:
         col_a, col_b = st.columns(2)
         with col_a: nome_alvo = st.text_input("Nome da pessoa:", key="nome_alvo_int")
         with col_b: genero_int = st.radio("Essa pessoa é:", ["Homem", "Mulher"], key="gen_int")
-        comportamento = st.text_area("Descreva o comportamento suspeito dela:", key="comp_input")
+        comportamento = st.text_area("Descreva o comportamento suspeito:", key="comp_input")
         
         if st.button("DESVENDAR INTENÇÃO"):
             if chave_api and comportamento:
