@@ -1,55 +1,71 @@
 import streamlit as st
 from groq import Groq
+import random
 
 # --- 1. CONFIGURAÇÃO E ESTILO ---
-st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
+st.set_page_config(page_title="Tenda do Ravengar",
+page_icon="🔮",
+layout="wide")
 
 st.markdown(f"""
     <style>
     header {{visibility: hidden;}}
-    .stApp {{ background-color: #F7F7F7 !important; }}
+    .stApp {{ background-color:
+#F7F7F7 !important; }}
     
-    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    html, body,
+[class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
+        font-family: 'Helvetica Neue',
+Helvetica, Arial, sans-serif !important;
         color: #000000 !important;
     }}
 
     .quiz-pergunta {{
         font-size: 26px !important;
         font-weight: 600 !important;
-        margin-bottom: 30px !important;
+        margin-bottom: 30px
+!important;
         line-height: 1.4;
     }}
 
     .stButton > button {{
-        background-color: #FFD1DC !important;
+        background-color: #FFD1DC
+!important;
         color: #000000 !important;
         font-weight: bold !important;
-        border: 1px solid #FFB7C5 !important;
-        border-radius: 12px !important;
+        border: 1px solid #FFB7C5
+!important;
+        border-radius: 12px
+!important;
         width: 100%;
         height: 50px;
         transition: all 0.3s ease;
     }}
 
     .ravengar-card {{
-        background-color: #FFFFFF !important;
-        border: 2px solid #FFD1DC !important;
+        background-color: #FFFFFF
+!important;
+        border: 2px solid #FFD1DC
+!important;
         padding: 25px;
         border-radius: 15px;
-        box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
+        box-shadow: 4px 4px 15px
+rgba(0,0,0,0.05);
         margin-bottom: 20px;
     }}
 
     .biblioteca-card {{
-        background-color: #FFFFFF !important;
-        border: 1px solid #FFD1DC !important;
+        background-color: #FFFFFF
+!important;
+        border: 1px solid #FFD1DC
+!important;
         padding: 20px;
         border-radius: 12px;
         margin-bottom: 15px;
     }}
     </style>
-    """, unsafe_allow_html=True)
+    """,
+unsafe_allow_html=True)
 
 # --- 2. LÓGICA DE CONEXÃO (PERSONALIZADA POR ESFERA) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
@@ -76,7 +92,9 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
             "Teu tom é curativo e equilibrado."
         ),
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria."
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria.",
+        "Noticias": "És o Ravengar. Atuas como um curador de informações. Resume notícias de forma mística, ácida e inteligente.",
+        "Tarot": "És o Ravengar, o mestre das cartas. Interpretas o Tarot de forma curta e impactante."
     }
     
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
@@ -85,8 +103,8 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
     try:
         client = Groq(api_key=api_key)
         completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
-            model="llama-3.3-70b-versatile",
+           messages=[{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
+           model="llama-3.3-70b-versatile",
         )
         return completion.choices[0].message.content
     except Exception as e:
@@ -102,7 +120,7 @@ with st.sidebar:
 
 # --- 4. IDENTIFICAÇÃO ---
 if 'usuario_identificado' not in st.session_state:
-    st.session_state.usuario_identificado = False
+   st.session_state.usuario_identificado = False
 
 if not st.session_state.usuario_identificado:
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
@@ -110,15 +128,15 @@ if not st.session_state.usuario_identificado:
     genero_input = st.radio("O teu género:", ["Masculino", "Feminino"])
     if st.button("ENTRAR NA TENDA"):
         if nome_input:
-            st.session_state.nome_user, st.session_state.genero_user = nome_input, genero_input
-            st.session_state.usuario_identificado = True
-            st.rerun()
+           st.session_state.nome_user, st.session_state.genero_user = nome_input, genero_input
+           st.session_state.usuario_identificado = True
+           st.rerun()
 else:
     # --- 5. INTERFACE PRINCIPAL ---
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>.</p>", unsafe_allow_html=True)
 
-    tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta"])
+    tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta", "🧘 Seu Espaço"])
 
     # --- ABA 1: ORÁCULO ---
     with tabs[0]:
@@ -225,6 +243,42 @@ else:
             if st.button(item["botao"], key=item["id"]):
                 st.warning(f"**Conhecimento Revelado:** [CLIQUE AQUI PARA BAIXAR]({item['link']})")
             st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- ABA 6: SEU ESPAÇO (NOVA FUNCIONALIDADE) ---
+    with tabs[5]:
+        st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
+        
+        # 1. Escolha de Assunto e Notícias
+        st.markdown("### 📰 Radar do Ravengar")
+        tema_escolhido = st.selectbox("Escolha um assunto para curadoria:", ["Trabalho", "Amor", "Mistérios do Mundo"])
+        if st.button("BUSCAR NO ÉTER"):
+            if chave_api:
+                noticias = consultar_ravengar(f"Resuma 3 notícias reais e importantes de hoje sobre {tema_escolhido} com o seu tom místico.", chave_api, "Noticias")
+                st.session_state['noticias_dia'] = noticias
+        
+        if 'noticias_dia' in st.session_state:
+            st.markdown(f"<div class='ravengar-card'>{st.session_state['noticias_dia']}</div>", unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # 2. Tarot do Dia
+        st.markdown("### 🃏 Tarot do Dia")
+        if st.button("PUXAR CARTA DO DIA"):
+            if chave_api:
+                cartas_tarot = ["O Mago", "A Sacerdotisa", "A Imperatriz", "O Imperador", "O Hierofante", "Os Enamorados", "O Carro", "A Justiça", "O Eremita", "A Roda da Fortuna", "A Força", "O Pendurado", "A Morte", "A Temperança", "O Diabo", "A Torre", "A Estrela", "A Lua", "O Sol", "O Julgamento", "O Mundo", "O Louco"]
+                carta_sorteada = random.choice(cartas_tarot)
+                interpretacao = consultar_ravengar(f"Saí com a carta '{carta_sorteada}'. Dê um veredito curto e místico para o meu dia.", chave_api, "Tarot")
+                st.session_state['carta_dia'] = (carta_sorteada, interpretacao)
+
+        if 'carta_dia' in st.session_state:
+            carta, texto = st.session_state['carta_dia']
+            st.markdown(f"""
+                <div class='ravengar-card' style='text-align: center;'>
+                    <h2 style='color: #FF69B4;'>{carta}</h2>
+                    <p>{texto}</p>
+                    <small><i>Volte amanhã para ver se a sorte continua ou mudou...</i></small>
+                </div>
+            """, unsafe_allow_html=True)
 
     # --- 6. RODAPÉ ---
     st.markdown("---")
