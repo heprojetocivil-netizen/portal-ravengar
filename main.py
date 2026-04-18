@@ -48,44 +48,50 @@ st.markdown(f"""
         border-radius: 12px;
         margin-bottom: 15px;
     }}
+
+    /* Estilo para as bolhas de chat */
+    .user-msg {{
+        background-color: #E3F2FD;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+        border-left: 5px solid #2196F3;
+    }}
+    .bot-msg {{
+        background-color: #FFF0F5;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 5px solid #FFC0CB;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DE CONEXÃO (PERSONALIZADA POR ESFERA) ---
-def consultar_ravengar(pergunta, api_key, setor="Destino"):
-    # Aqui personalizamos a "alma" do Ravengar para cada esfera
+# --- 2. LÓGICA DE CONEXÃO (ADAPTADA PARA MEMÓRIA) ---
+def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
-        "Amor": (
-            "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática. "
-            "Falas sobre fios do destino, batimentos de coração e conexões de alma. "
-            "Teu tom é acolhedor, mas revelador sobre sentimentos ocultos."
-        ),
-        "Trabalho": (
-            "És o Ravengar, o Estrategista das Sombras. Tua linguagem é direta, fria e focada em poder e território. "
-            "Falas sobre movimentos de xadrez, colheita de esforços e a balança da justiça profissional. "
-            "Teu tom é assertivo e focado em resultados e ambição."
-        ),
-        "Futuro": (
-            "És o Ravengar, o Profeta do Tempo. Tua linguagem é enigmática, vasta e mística. "
-            "Falas sobre constelações, areias do tempo e o que está escrito no éter. "
-            "Teu tom é solene, avisando que o destino é uma estrada que se constrói ao caminhar."
-        ),
-        "Saude": (
-            "És o Ravengar, o Alquimista da Vitalidade. Tua linguagem é serena, focada em equilíbrio e fluxos de energia. "
-            "Falas sobre o templo interior, chakras e a harmonia entre o espírito e a matéria. "
-            "Teu tom é curativo e equilibrado."
-        ),
-        "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria."
+        "Amor": "És o Ravengar, o Guardião dos Afetos. Linguagem poética e profunda.",
+        "Trabalho": "És o Ravengar, o Estrategista das Sombras. Linguagem direta e fria.",
+        "Futuro": "És o Ravengar, o Profeta do Tempo. Linguagem enigmática e mística.",
+        "Saude": "És o Ravengar, o Alquimista da Vitalidade. Linguagem serena e curativa.",
+        "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério.",
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantenha o contexto da investigação."
     }
     
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
     sistema += f" Nome do consulente: {st.session_state.nome_user}."
 
+    # Se houver histórico (Chat Contínuo), enviamos a conversa toda
+    mensagens = [{"role": "system", "content": sistema}]
+    if historico:
+        mensagens.extend(historico)
+    else:
+        mensagens.append({"role": "user", "content": pergunta})
+
     try:
         client = Groq(api_key=api_key)
         completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
+            messages=mensagens,
             model="llama-3.3-70b-versatile",
         )
         return completion.choices[0].message.content
@@ -139,7 +145,7 @@ else:
                 st.session_state['chat_ora'] = [{"content": consultar_ravengar(pergunta_ora, chave_api, setor)}]
         if 'chat_ora' in st.session_state:
             for msg in st.session_state['chat_ora']:
-                st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+                st.markdown(f<div class="ravengar-card">🔮 **Ravengar:**<br>{msg['content']}</div>, unsafe_allow_html=True)
 
     # --- ABA 2: DECIFRADOR ---
     with tabs[1]:
@@ -151,35 +157,54 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 3: DETETIVE VIRTUAL ---
+    # --- ABA 3: DETETIVE VIRTUAL (CHAT CONTÍNUO) ---
     with tabs[2]:
-        nome_alvo = st.text_input("Quem vamos investigar?")
-        comp = st.text_area("Descreve o comportamento:")
-        if st.button("INICIAR INVESTIGAÇÃO"):
-            if chave_api and comp:
-                st.session_state['chat_det'] = [{"content": consultar_ravengar(f"Investigar {nome_alvo}: {comp}", chave_api, "Detetive")}]
-        if 'chat_det' in st.session_state:
-            for msg in st.session_state['chat_det']:
-                st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+        if 'historico_detetive' not in st.session_state:
+            st.session_state.historico_detetive = []
+        
+        nome_alvo = st.text_input("Nome da pessoa a ser investigada:", key="alvo_detetive")
+        
+        # Mostrar conversa acumulada
+        for msg in st.session_state.historico_detetive:
+            if msg["role"] == "user":
+                st.markdown(f"<div class='user-msg'><b>Você:</b> {msg['content']}</div>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<div class='bot-msg'><b>Ravengar:</b> {msg['content']}</div>", unsafe_allow_html=True)
+
+        # Campo para a pessoa digitar
+        pergunta_detetive = st.text_input("Sua pergunta ou observação:", key="input_conversa")
+        
+        c_env, c_res = st.columns([4,1])
+        with c_env:
+            if st.button("ENVIAR"):
+                if chave_api and pergunta_detetive:
+                    # Adiciona a pergunta ao histórico
+                    st.session_state.historico_detetive.append({"role": "user", "content": pergunta_detetive})
+                    
+                    # Envia todo o histórico para a IA
+                    contexto_completo = f"Sobre o alvo {nome_alvo}: {pergunta_detetive}"
+                    resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.historico_detetive)
+                    
+                    # Adiciona a resposta ao histórico
+                    st.session_state.historico_detetive.append({"role": "assistant", "content": resposta})
+                    st.rerun()
+        with c_res:
+            if st.button("LIMPAR CHAT"):
+                st.session_state.historico_detetive = []
+                st.rerun()
 
     # --- ABA 4: QUIZ PSICOLÓGICO ---
     with tabs[3]:
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
-        
         if not st.session_state.quiz_iniciado:
             st.markdown("<div style='text-align: center; padding: 40px;'>", unsafe_allow_html=True)
             st.markdown("## Você acha que se conhece bem? 🤔")
-            st.markdown("#### Faça o nosso teste e descubra camadas da sua personalidade que você nunca percebeu.")
             if st.button("CLIQUE PARA INICIAR"):
-                st.session_state.quiz_iniciado = True
-                st.session_state.passo = 0
-                st.session_state.analise = []
-                st.rerun()
+                st.session_state.quiz_iniciado = True; st.session_state.passo = 0; st.session_state.analise = []; st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
         else:
             g = st.session_state.genero_user
             art, um, guerr, reser = ("o", "um", "guerreiro", "reservado") if g == "Masculino" else ("a", "uma", "guerreira", "reservada")
-            
             perguntas = [
                 {"contexto": "Você caminha por uma floresta densa...", "p": "Nesta caminhada, você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Sua essência é de independência.", "Com alguém": "Você valoriza conexões próximas."}},
                 {"contexto": "De repente, um animal surge à sua frente.", "p": "Que animal é este?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente age como {um} {guerr}.", "Coelho": "Sua natureza busca calma.", "Pássaro": "Sua agilidade mental é rara."}},
@@ -192,7 +217,6 @@ else:
                 {"contexto": "Você observa o material da xícara.", "p": "De que material ela é?", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada.", "Metal": "Sua lealdade é inquebrável."}},
                 {"contexto": "Ao sair, encontra um lago sereno.", "p": "Diante da água, qual sua atitude?", "o": ["Mergulha", "Toca a água", "Contempla"], "s": {"Mergulha": "Você se entrega de corpo e alma nos relacionamentos.", "Toca a água": "Você domina o equilíbrio.", "Contempla": f"Você é {um} observador {reser}."}}
             ]
-
             if st.session_state.passo < len(perguntas):
                 q = perguntas[st.session_state.passo]
                 st.info(q['contexto'])
@@ -203,36 +227,24 @@ else:
                         st.session_state.analise.append(q['s'][opt]); st.session_state.passo += 1; st.rerun()
             else:
                 st.markdown("<div class='ravengar-card'>", unsafe_allow_html=True)
-                st.markdown(f"<h3>O Veredito Psicológico de {st.session_state.nome_user}</h3>", unsafe_allow_html=True)
                 st.write(" ".join(st.session_state.analise))
-                if st.button("REINICIAR JORNADA"): 
-                    st.session_state.quiz_iniciado = False
-                    st.rerun()
+                if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
     # --- ABA 5: BIBLIOTECA SECRETA ---
     with tabs[4]:
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         biblioteca = [
-            {"id": "f1", "titulo": "❤️ Fragmento I — Amor Oculto", "desc": "Sinais silenciosos de sentimentos que não são ditos.", "botao": "🔓 Aceder", "link": "#"},
-            {"id": "f2", "titulo": "🔥 Ritual II — Desapego", "desc": "Práticas para libertar a mente de conexões passadas.", "botao": "🔓 Abrir", "link": "#"},
-            {"id": "f3", "titulo": "🌙 Fragmento III — Leis do Destino", "desc": "O que as coincidências estão a tentar dizer-lhe.", "botao": "🔓 Ver Destino", "link": "#"},
-            {"id": "f4", "titulo": "🧠 Código IV — A Mente Alheia", "desc": "A arte de ler intenções através do comportamento.", "botao": "🔓 Decifrar", "link": "#"},
-            {"id": "f5", "titulo": "🕯️ Fragmento V — Proteção Energética", "desc": "Blindagem espiritual para o seu templo interior.", "botao": "🔓 Fortalecer", "link": "#"}
+            {"id": "f1", "titulo": "❤️ Fragmento I", "desc": "Sinais silenciosos.", "botao": "🔓 Aceder"},
+            {"id": "f2", "titulo": "🔥 Ritual II", "desc": "Desapego.", "botao": "🔓 Abrir"},
+            {"id": "f3", "titulo": "🌙 Fragmento III", "desc": "Leis do Destino.", "botao": "🔓 Ver"},
+            {"id": "f4", "titulo": "🧠 Código IV", "desc": "Mente Alheia.", "botao": "🔓 Decifrar"},
+            {"id": "f5", "titulo": "🕯️ Fragmento V", "desc": "Proteção.", "botao": "🔓 Fortalecer"}
         ]
         for item in biblioteca:
             st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
-            if st.button(item["botao"], key=item["id"]):
-                st.warning(f"**Conhecimento Revelado:** [CLIQUE AQUI PARA BAIXAR]({item['link']})")
-            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button(item["botao"], key=item["id"]): st.warning("Conhecimento Revelado!")
 
     # --- 6. RODAPÉ ---
     st.markdown("---")
-    st.markdown(
-        "<div style='text-align: center; color: #666; padding: 20px;'>"
-        "Venha se divertir e concorrer a muitos prêmios com a gente.<br>"
-        "<a href='http://www.quizmaispremios.com.br' target='_blank' style='color: #FF69B4; font-weight: bold; text-decoration: none;'>"
-        "www.quizmaispremios.com.br</a>"
-        "</div>", 
-        unsafe_allow_html=True
-    )
+    st.markdown("<div style='text-align: center;'><a href='http://www.quizmaispremios.com.br' target='_blank'>www.quizmaispremios.com.br</a></div>", unsafe_allow_html=True)
