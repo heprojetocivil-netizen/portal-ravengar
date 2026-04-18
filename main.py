@@ -8,7 +8,22 @@ st.markdown("""
     <style>
     header {visibility: hidden;}
     .stApp { background-color: #F7F7F7 !important; }
-    .stApp p, .stApp span, .stApp label, h1, h2, h3 { color: #000000 !important; }
+    
+    /* Fonte das esferas e padrão reto para o app */
+    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+        color: #000000 !important;
+    }
+
+    /* Ajuste específico para as perguntas do Quiz */
+    .quiz-pergunta {
+        font-size: 26px !important;
+        font-weight: 600 !important;
+        color: #000000 !important;
+        margin-bottom: 30px !important;
+        text-align: center;
+        line-height: 1.4;
+    }
     
     div.stButton > button, div.stFormSubmitButton > button {
         background-color: #FFD1DC !important;
@@ -18,18 +33,19 @@ st.markdown("""
         border-radius: 12px !important;
         width: 100%;
         transition: 0.3s;
+        font-size: 16px !important;
     }
     
     .ravengar-card {
         background-color: #FFFFFF !important;
         border: 2px solid #FFD1DC !important;
-        padding: 25px;
+        padding: 30px;
         border-radius: 15px;
         color: #000000 !important;
         margin-bottom: 20px;
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.05);
-        line-height: 1.6;
-        font-size: 18px;
+        box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
+        line-height: 1.8;
+        font-size: 19px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -160,10 +176,12 @@ with tab4:
 
         if st.session_state.passo < len(perguntas):
             q = perguntas[st.session_state.passo]
-            st.write(f"### {q['p']}")
+            # Div especial para controlar o tamanho da fonte da pergunta
+            st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
+            
             cols = st.columns(len(q['o']))
             for i, opt in enumerate(q['o']):
-                if cols[i].button(opt, key=f"q_final_fix_v2_{st.session_state.passo}_{i}"):
+                if cols[i].button(opt, key=f"q_final_font_{st.session_state.passo}_{i}"):
                     st.session_state.analise.append(q['s'][opt])
                     st.session_state.passo += 1
                     st.rerun()
