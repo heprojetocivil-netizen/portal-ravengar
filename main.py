@@ -3,22 +3,22 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (CORREÇÃO DA BARRA LATERAL) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (CORREÇÃO CIRÚRGICA DA BARRA LATERAL) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
     <style>
-    /* Esconde a linha e decorações do header, mas MANTÉM o botão da sidebar */
+    /* Esconde os elementos decorativos do header, mas mantém o botão da sidebar vivo */
     header[data-testid="stHeader"] {{
         background-color: rgba(0,0,0,0) !important;
-        color: transparent !important;
+        border-bottom: none !important;
     }}
     
-    /* Força o botão da setinha a aparecer e ficar na cor rosa */
+    /* Garante que o botão da setinha (abrir/fechar sidebar) esteja SEMPRE visível */
     button[data-testid="stSidebarCollapseButton"] {{
         visibility: visible !important;
         color: #FFB7C5 !important;
-        background-color: transparent !important;
+        z-index: 999;
     }}
 
     .stApp {{ background-color: #F7F7F7 !important; }}
@@ -76,7 +76,7 @@ st.markdown(f"""
 # --- 2. LÓGICA DO MURAL GLOBAL (UM ESCREVE, TODOS VEEM) ---
 @st.cache_resource
 def obter_mural_global():
-    return [] # Esta lista fica na memória do servidor, compartilhada por todos os usuários
+    return [] 
 
 mural_global = obter_mural_global()
 
