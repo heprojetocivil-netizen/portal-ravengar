@@ -52,7 +52,7 @@ st.markdown(f"""
     """, unsafe_allow_html=True)
 
 # --- 2. LÓGICA DE CONEXÃO ---
-def consultar_ravengar(pergunta, api_key, setor="Destino"):
+def consultar_ravengar(pergunta, api_key, setor="Destino", historico=[]):
     prompts = {
         "Amor": "És o Ravengar. Analisa conexões de alma e sentimentos.",
         "Trabalho": "És o Ravengar. Analisa estratégia e poder.",
@@ -62,12 +62,20 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
         "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento da pessoa mencionada com precisão. Foca no alvo da investigação."
     }
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
-    sistema += f" Nome: {st.session_state.nome_user}."
+    sistema += f" Nome do consulente: {st.session_state.nome_user}."
+
+    messages = [{"role": "system", "content": sistema}]
+    # Adiciona histórico para manter o contexto da conversa
+    for msg in historico:
+        role = "assistant" if msg["role"] == "ravengar" else "user"
+        messages.append({"role": role, "content": msg["content"]})
+    
+    messages.append({"role": "user", "content": pergunta})
 
     try:
         client = Groq(api_key=api_key)
         completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
+            messages=messages,
             model="llama-3.3-70b-versatile",
         )
         return completion.choices[0].message.content
@@ -115,34 +123,53 @@ else:
             if st.button("🌿 SAÚDE", key="btn_Saude"): st.session_state.setor = "Saude"; st.rerun()
         
         setor = st.session_state.get('setor', 'Destino')
-        pergunta_ora = st.text_area(f"O que desejas saber sobre o teu {setor}?")
-        if st.button("PROFERIR VEREDITO"):
+        pergunta_ora = st.text_input(f"O que desejas saber sobre o teu {setor}?", key="input_ora")
+        if st.button("PROFERIR VEREDITO", key="send_ora"):
             if chave_api and pergunta_ora:
-                st.session_state['chat_ora'] = [{"content": consultar_ravengar(pergunta_ora, chave_api, setor)}]
+                if 'chat_ora' not in st.session_state: st.session_state.chat_ora = []
+                resposta = consultar_ravengar(pergunta_ora, chave_api, setor, st.session_state.chat_ora)
+                st.session_state.chat_ora.append({"role": "user", "content": pergunta_ora})
+                st.session_state.chat_ora.append({"role": "ravengar", "content": resposta})
+        
         if 'chat_ora' in st.session_state:
-            for msg in st.session_state['chat_ora']:
-                st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+            for msg in reversed(st.session_state.chat_ora):
+                icon = "👤" if msg["role"] == "user" else "🔮"
+                st.markdown(f"<div class='ravengar-card'>**{icon} {msg['role'].capitalize()}:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
     # --- ABA 2: DECIFRADOR ---
     with tabs[1]:
-        texto_dec = st.text_area("Descreve o símbolo ou sonho:")
-        if st.button("DECIFRAR MISTÉRIO"):
+        texto_dec = st.text_input("Descreve o símbolo ou sonho:", key="input_dec")
+        if st.button("DECIFRAR MISTÉRIO", key="send_dec"):
             if chave_api and texto_dec:
-                st.session_state['chat_dec'] = [{"content": consultar_ravengar(texto_dec, chave_api, "Decifrador")}]
+                if 'chat_dec' not in st.session_state: st.session_state.chat_dec = []
+                resposta = consultar_ravengar(texto_dec, chave_api, "Decifrador", st.session_state.chat_dec)
+                st.session_state.chat_dec.append({"role": "user", "content": texto_dec})
+                st.session_state.chat_dec.append({"role": "ravengar", "content": resposta})
+        
         if 'chat_dec' in st.session_state:
-            for msg in st.session_state['chat_dec']:
-                st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
+            for msg in reversed(st.session_state.chat_dec):
+                icon = "👤" if msg["role"] == "user" else "👁️"
+                st.markdown(f"<div class='ravengar-card'>**{icon} {msg['role'].capitalize()}:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 3: DETETIVE VIRTUAL ---
+    # --- ABA 3: DETETIVE VIRTUAL (RESTAURADA COMO CHAT) ---
     with tabs[2]:
-        nome_alvo = st.text_input("Quem vamos investigar?")
-        comp = st.text_area("Descreve o comportamento:")
-        if st.button("INICIAR INVESTIGAÇÃO"):
-            if chave_api and comp:
-                st.session_state['chat_det'] = [{"content": consultar_ravengar(f"Investigar {nome_alvo}: {comp}", chave_api, "Detetive")}]
-        if 'chat_det' in st.session_state:
-            for msg in st.session_state['chat_det']:
-                st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+        if 'chat_det' not in st.session_state: st.session_state.chat_det = []
+        
+        # Campo para nova mensagem
+        nova_pergunta_det = st.text_input("Descreve o comportamento suspeito ou faz uma pergunta ao Detetive:", key="input_det")
+        
+        if st.button("INICIAR/CONTINUAR INVESTIGAÇÃO", key="send_det"):
+            if chave_api and nova_pergunta_det:
+                resposta = consultar_ravengar(nova_pergunta_det, chave_api, "Detetive", st.session_state.chat_det)
+                st.session_state.chat_det.append({"role": "user", "content": nova_pergunta_det})
+                st.session_state.chat_det.append({"role": "ravengar", "content": resposta})
+                st.rerun() # Atualiza para mostrar a nova mensagem no topo
+        
+        # Exibição do histórico
+        if st.session_state.chat_det:
+            for msg in reversed(st.session_state.chat_det):
+                icon = "👤" if msg["role"] == "user" else "🕵️"
+                st.markdown(f"<div class='ravengar-card'>**{icon} {msg['role'].capitalize()}:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
     # --- ABA 4: QUIZ PSICOLÓGICO ---
     with tabs[3]:
@@ -192,7 +219,7 @@ else:
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- ABA 5: BIBLIOTECA SECRETA (RESTAURADA) ---
+    # --- ABA 5: BIBLIOTECA SECRETA ---
     with tabs[4]:
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         biblioteca = [
