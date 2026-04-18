@@ -273,7 +273,8 @@ else:
                     st.session_state['data_clique_tarot'] = data_hoje
                     st.rerun()
         else:
-            st.info("🔮 O destino já falou por hoje. Volte amanhã para ver se a sorte continua.")
+            # FRASE MÍSTICA QUE VOCÊ PEDIU
+            st.info("🔮 A carta de hoje já cumpriu seu papel… mas o destino nunca repete mensagens. Volte amanhã e veja o que ele decide te mostrar.")
 
         if 'carta_dia' in st.session_state and st.session_state.get('data_clique_tarot') == data_hoje:
             c, t = st.session_state['carta_dia']
