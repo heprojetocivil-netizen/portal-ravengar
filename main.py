@@ -41,15 +41,7 @@ st.markdown(f"""
         margin-bottom: 20px;
     }}
 
-    .biblioteca-card {{
-        background-color: #FFFFFF !important;
-        border: 1px solid #FFD1DC !important;
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 15px;
-    }}
-
-    /* Estilo para as bolhas de chat */
+    /* Estilo para as bolhas de chat no Detetive */
     .user-msg {{
         background-color: #E3F2FD;
         padding: 10px;
@@ -67,7 +59,7 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DE CONEXÃO (ADAPTADA PARA MEMÓRIA) ---
+# --- 2. LÓGICA DE CONEXÃO ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": "És o Ravengar, o Guardião dos Afetos. Linguagem poética e profunda.",
@@ -75,13 +67,12 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
         "Futuro": "És o Ravengar, o Profeta do Tempo. Linguagem enigmática e mística.",
         "Saude": "És o Ravengar, o Alquimista da Vitalidade. Linguagem serena e curativa.",
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantenha o contexto da investigação."
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria."
     }
     
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
     sistema += f" Nome do consulente: {st.session_state.nome_user}."
 
-    # Se houver histórico (Chat Contínuo), enviamos a conversa toda
     mensagens = [{"role": "system", "content": sistema}]
     if historico:
         mensagens.extend(historico)
@@ -120,10 +111,7 @@ if not st.session_state.usuario_identificado:
             st.session_state.usuario_identificado = True
             st.rerun()
 else:
-    # --- 5. INTERFACE PRINCIPAL ---
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>.</p>", unsafe_allow_html=True)
-
     tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta"])
 
     # --- ABA 1: ORÁCULO ---
@@ -145,7 +133,7 @@ else:
                 st.session_state['chat_ora'] = [{"content": consultar_ravengar(pergunta_ora, chave_api, setor)}]
         if 'chat_ora' in st.session_state:
             for msg in st.session_state['chat_ora']:
-                st.markdown(f<div class="ravengar-card">🔮 **Ravengar:**<br>{msg['content']}</div>, unsafe_allow_html=True)
+                st.markdown(f'<div class="ravengar-card">🔮 **Ravengar:**<br>{msg["content"]}</div>', unsafe_allow_html=True)
 
     # --- ABA 2: DECIFRADOR ---
     with tabs[1]:
@@ -155,7 +143,7 @@ else:
                 st.session_state['chat_dec'] = [{"content": consultar_ravengar(texto_dec, chave_api, "Decifrador")}]
         if 'chat_dec' in st.session_state:
             for msg in st.session_state['chat_dec']:
-                st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
+                st.markdown(f'<div class="ravengar-card">👁️ {msg["content"]}</div>', unsafe_allow_html=True)
 
     # --- ABA 3: DETETIVE VIRTUAL (CHAT CONTÍNUO) ---
     with tabs[2]:
@@ -164,28 +152,20 @@ else:
         
         nome_alvo = st.text_input("Nome da pessoa a ser investigada:", key="alvo_detetive")
         
-        # Mostrar conversa acumulada
         for msg in st.session_state.historico_detetive:
             if msg["role"] == "user":
                 st.markdown(f"<div class='user-msg'><b>Você:</b> {msg['content']}</div>", unsafe_allow_html=True)
             else:
                 st.markdown(f"<div class='bot-msg'><b>Ravengar:</b> {msg['content']}</div>", unsafe_allow_html=True)
 
-        # Campo para a pessoa digitar
         pergunta_detetive = st.text_input("Sua pergunta ou observação:", key="input_conversa")
         
         c_env, c_res = st.columns([4,1])
         with c_env:
             if st.button("ENVIAR"):
                 if chave_api and pergunta_detetive:
-                    # Adiciona a pergunta ao histórico
-                    st.session_state.historico_detetive.append({"role": "user", "content": pergunta_detetive})
-                    
-                    # Envia todo o histórico para a IA
-                    contexto_completo = f"Sobre o alvo {nome_alvo}: {pergunta_detetive}"
+                    st.session_state.historico_detetive.append({"role": "user", "content": f"Investigando {nome_alvo}: {pergunta_detetive}"})
                     resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.historico_detetive)
-                    
-                    # Adiciona a resposta ao histórico
                     st.session_state.historico_detetive.append({"role": "assistant", "content": resposta})
                     st.rerun()
         with c_res:
@@ -197,8 +177,7 @@ else:
     with tabs[3]:
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
         if not st.session_state.quiz_iniciado:
-            st.markdown("<div style='text-align: center; padding: 40px;'>", unsafe_allow_html=True)
-            st.markdown("## Você acha que se conhece bem? 🤔")
+            st.markdown("<div style='text-align: center; padding: 40px;'><h2>Você se conhece bem?</h2>", unsafe_allow_html=True)
             if st.button("CLIQUE PARA INICIAR"):
                 st.session_state.quiz_iniciado = True; st.session_state.passo = 0; st.session_state.analise = []; st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
@@ -235,15 +214,15 @@ else:
     with tabs[4]:
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         biblioteca = [
-            {"id": "f1", "titulo": "❤️ Fragmento I", "desc": "Sinais silenciosos.", "botao": "🔓 Aceder"},
-            {"id": "f2", "titulo": "🔥 Ritual II", "desc": "Desapego.", "botao": "🔓 Abrir"},
-            {"id": "f3", "titulo": "🌙 Fragmento III", "desc": "Leis do Destino.", "botao": "🔓 Ver"},
-            {"id": "f4", "titulo": "🧠 Código IV", "desc": "Mente Alheia.", "botao": "🔓 Decifrar"},
-            {"id": "f5", "titulo": "🕯️ Fragmento V", "desc": "Proteção.", "botao": "🔓 Fortalecer"}
+            {"id": "f1", "titulo": "❤️ Fragmento I", "desc": "Sinais silenciosos."},
+            {"id": "f2", "titulo": "🔥 Ritual II", "desc": "Desapego."},
+            {"id": "f3", "titulo": "🌙 Fragmento III", "desc": "Leis do Destino."},
+            {"id": "f4", "titulo": "🧠 Código IV", "desc": "Mente Alheia."},
+            {"id": "f5", "titulo": "🕯️ Fragmento V", "desc": "Proteção."}
         ]
         for item in biblioteca:
             st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
-            if st.button(item["botao"], key=item["id"]): st.warning("Conhecimento Revelado!")
+            if st.button("🔓 Aceder", key=item["id"]): st.warning("Conhecimento Revelado!")
 
     # --- 6. RODAPÉ ---
     st.markdown("---")
