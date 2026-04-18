@@ -3,12 +3,12 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (MANTIDO INTACTO) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (CORRIGIDO PARA MANTER A BARRA LATERAL ACESSÍVEL) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
     <style>
-    header {{visibility: hidden;}}
+    /* Linha do header removida para não esconder o botão da barra lateral */
     .stApp {{ background-color: #F7F7F7 !important; }}
     
     html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
