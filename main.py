@@ -35,7 +35,7 @@ st.markdown(f"""
         transition: all 0.3s ease;
     }}
 
-    /* Estilo das Esferas com Destaque */
+    /* Estilo das Esferas */
     button[key*="Amor"] {{ background-color: { "#FFB2C1" if setor_ativo == "Amor" else "#FFD1DC" } !important; border: { "2px solid #FF69B4" if setor_ativo == "Amor" else "1px solid #FFB7C5" } !important; }}
     button[key*="Trabalho"] {{ background-color: { "#FFB2C1" if setor_ativo == "Trabalho" else "#FFD1DC" } !important; border: { "2px solid #FF69B4" if setor_ativo == "Trabalho" else "1px solid #FFB7C5" } !important; }}
     button[key*="Futuro"] {{ background-color: { "#FFB2C1" if setor_ativo == "Futuro" else "#FFD1DC" } !important; border: { "2px solid #FF69B4" if setor_ativo == "Futuro" else "1px solid #FFB7C5" } !important; }}
@@ -51,14 +51,12 @@ st.markdown(f"""
         margin-bottom: 20px;
     }}
 
-    .veredito-card {{
+    .biblioteca-card {{
         background-color: #FFFFFF !important;
-        border: 2px solid #FFD1DC !important;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
-        line-height: 1.8;
-        font-size: 20px !important;
+        border: 1px solid #FFD1DC !important;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
     }}
     </style>
     """, unsafe_allow_html=True)
@@ -66,15 +64,15 @@ st.markdown(f"""
 # --- 2. LÓGICA DE CONEXÃO BLINDADA ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
     prompts = {
-        "Amor": "Você é o Ravengar. Analise conexões de alma e sentimentos. Você é um observador frio e místico.",
-        "Trabalho": "Você é o Ravengar. Analise estratégia e poder. Revele verdades de mercado.",
-        "Futuro": "Você é o Ravengar. Você vê o que o tempo esconde. Suas palavras são decretos.",
-        "Saude": "Você é o Ravengar. Analise o templo carnal e a energia vital.",
-        "Decifrador": "Você é o Ravengar. Traduza símbolos e sonhos para a realidade do usuário.",
-        "Intencao": "VOCÊ É O RAVENGAR. Analise a pessoa que o usuário mencionou. Você NUNCA fala de si mesmo. Se o usuário disser 'ela me procura' ou 'por que me procura?', ele fala do ALVO analisado, não de você. Você apenas habita a tenda."
+        "Amor": "És o Ravengar. Analisa conexões de alma e sentimentos. És um observador frio e místico.",
+        "Trabalho": "És o Ravengar. Analisa estratégia e poder. Revela verdades de mercado.",
+        "Futuro": "És o Ravengar. Vês o que o tempo esconde. As tuas palavras são decretos.",
+        "Saude": "És o Ravengar. Analisa o templo carnal e a energia vital.",
+        "Decifrador": "És o Ravengar. Traduz símbolos e sonhos para a realidade do utilizador.",
+        "Intencao": "ÉS O RAVENGAR. Analisa a pessoa que o utilizador mencionou. NUNCA fales de ti mesmo. Se o utilizador disser 'ela procura-me', ele fala do alvo analisado, não de ti."
     }
-    sistema = prompts.get(setor, "Você é o Ravengar, um oráculo místico.")
-    sistema += f" Nome: {st.session_state.nome_user}. Gênero: {st.session_state.genero_user}. Regras: Nunca saia do personagem. Nunca aja como IA."
+    sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
+    sistema += f" Nome: {st.session_state.nome_user}. Género: {st.session_state.genero_user}. Regra: Nunca saias da personagem."
 
     try:
         client = Groq(api_key=api_key)
@@ -94,14 +92,14 @@ with st.sidebar:
         for key in list(st.session_state.keys()): del st.session_state[key]
         st.rerun()
 
-# --- 4. FLUXO DE IDENTIFICAÇÃO ---
+# --- 4. IDENTIFICAÇÃO ---
 if 'usuario_identificado' not in st.session_state:
     st.session_state.usuario_identificado = False
 
 if not st.session_state.usuario_identificado:
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
-    nome_input = st.text_input("Como as sombras devem te chamar?")
-    genero_input = st.radio("Seu gênero:", ["Masculino", "Feminino"])
+    nome_input = st.text_input("Como as sombras te devem chamar?")
+    genero_input = st.radio("O teu género:", ["Masculino", "Feminino"])
     if st.button("ENTRAR NA TENDA"):
         if nome_input:
             st.session_state.nome_user, st.session_state.genero_user = nome_input, genero_input
@@ -115,9 +113,8 @@ else:
 
     tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Intenção", "🧠 Quiz", "👉 Biblioteca Secreta"])
 
-    # --- ABA 1: ORÁCULO ---
+    # --- ABA 1, 2, 3 (Oráculo, Decifrador, Intenção) ---
     with tabs[0]:
-        st.markdown("### Escolha sua Esfera")
         c1, c2, c3, c4 = st.columns(4)
         with c1: 
             if st.button("❤️ AMOR", key="btn_Amor"): st.session_state.setor = "Amor"; st.rerun()
@@ -129,7 +126,7 @@ else:
             if st.button("🌿 SAÚDE", key="btn_Saude"): st.session_state.setor = "Saude"; st.rerun()
         
         setor = st.session_state.get('setor', 'Destino')
-        pergunta_ora = st.text_area(f"O que as sombras revelam sobre seu {setor}?")
+        pergunta_ora = st.text_area(f"O que as sombras revelam sobre o teu {setor}?")
         if st.button("PROFERIR VEREDITO"):
             if chave_api and pergunta_ora:
                 st.session_state['chat_ora'] = [{"role": "ravengar", "content": consultar_ravengar(pergunta_ora, chave_api, setor)}]
@@ -137,10 +134,8 @@ else:
             for msg in st.session_state['chat_ora']:
                 st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 2: DECIFRADOR ---
     with tabs[1]:
-        st.markdown("### 👁️ O Decifrador")
-        texto_dec = st.text_area("Descreva o símbolo, sonho ou mistério:")
+        texto_dec = st.text_area("Descreve o símbolo ou sonho:")
         if st.button("DECIFRAR"):
             if chave_api and texto_dec:
                 st.session_state['chat_dec'] = [{"role": "ravengar", "content": consultar_ravengar(texto_dec, chave_api, "Decifrador")}]
@@ -148,35 +143,33 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>🔮 {msg['content']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 3: INTENÇÃO ---
     with tabs[2]:
-        st.markdown("### 🔥 Teste de Intenção Real")
-        nome_alvo = st.text_input("Pessoa alvo (nome):")
-        comp = st.text_area("Descreva o comportamento estranho ou suspeito:")
+        nome_alvo = st.text_input("Alvo:")
+        comp = st.text_area("Comportamento:")
         if st.button("DESVENDAR"):
             if chave_api and comp:
-                st.session_state['chat_int'] = [{"role": "ravengar", "content": consultar_ravengar(f"Analise {nome_alvo}: {comp}", chave_api, "Intencao")}]
+                st.session_state['chat_int'] = [{"role": "ravengar", "content": consultar_ravengar(f"Analisa {nome_alvo}: {comp}", chave_api, "Intencao")}]
         if 'chat_int' in st.session_state:
             for msg in st.session_state['chat_int']:
                 st.markdown(f"<div class='ravengar-card'>🔮 {msg['content']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 4: QUIZ PSICOLÓGICO ---
+    # --- ABA 4: QUIZ ---
     with tabs[3]:
         if 'passo' not in st.session_state: st.session_state.passo, st.session_state.analise = 0, []
         g = st.session_state.genero_user
         art, um, guerr, reser = ("o", "um", "guerreiro", "reservado") if g == "Masculino" else ("a", "uma", "guerreira", "reservada")
         
         perguntas = [
-            {"p": f"{st.session_state.nome_user}, você caminha pela floresta... você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Você possui uma essência de independência.", "Com alguém": "Você valoriza a presença das pessoas."}},
-            {"p": "Você vê um animal na sua frente, qual é?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente age como {um} {guerr}.", "Coelho": "Sua natureza busca refúgio na calma.", "Pássaro": "Você detém uma agilidade mental rara."}},
-            {"p": "A sua reação ao ver o animal é:", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "Sua inteligência é movida pela cautela.", "Permanecer": "Você não teme o desconhecido."}},
-            {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera com planejamento.", "Terra": "Seu espírito vibra na liberdade."}},
-            {"p": "Você avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": "Suas ambições são vastas.", "Pequena": "Sua alma entende o essencial."}},
-            {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": f"Você é {reser}, protegendo seu interior.", "Não": "Você acredita na transparência."}},
-            {"p": "Você decide entrar na casa... A mesa dentro dela está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento é de conexão emocional.", "Vazia": "Você atravessa uma fase de busca profunda."}},
-            {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você valoriza o que moldou seu passado.", "Ignora": "Seu foco é o horizonte à frente."}},
-            {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada.", "Metal": "Sua lealdade é inquebrável."}},
-            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla"], "s": {"Mergulha": "Você se entrega de corpo e alma nos relacionamentos.", "Toca a água": "Você domina o equilíbrio.", "Contempla": f"Você é um observador {reser}."}}
+            {"p": f"{st.session_state.nome_user}, caminhas pela floresta... estás:", "o": ["Só", "Com alguém"], "s": {"Só": "Tens uma essência independente.", "Com alguém": "Valorizas a presença alheia."}},
+            {"p": "Vês um animal, qual é?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"A tua mente age como {um} {guerr}.", "Coelho": "Buscas refúgio na calma.", "Pássaro": "Tens agilidade mental rara."}},
+            {"p": "A tua reação é:", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "És movido pela cautela.", "Permanecer": "Não temes o desconhecido."}},
+            {"p": "Como é a estrada?", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Operas com planeamento.", "Terra": "Vibras na liberdade."}},
+            {"p": "Como é a casa?", "o": ["Grande", "Pequena"], "s": {"Grande": "Tens ambições vastas.", "Pequena": "Entendes o essencial."}},
+            {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": f"És {reser}.", "Não": "Crês na transparência."}},
+            {"p": "A mesa está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Estás em conexão emocional.", "Vazia": "Estás em busca profunda."}},
+            {"p": "Vês uma xícara no chão:", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Valorizas o passado.", "Ignora": "Focas no horizonte."}},
+            {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "O teu afeto é refinado.", "Metal": "A tua lealdade é inquebrável."}},
+            {"p": "No lago, tu:", "o": ["Mergulha", "Toca a água", "Contempla"], "s": {"Mergulha": "Entregas-te de corpo e alma.", "Toca a água": "Dominas o equilíbrio.", "Contempla": f"És {um} observador {reser}."}}
         ]
 
         if st.session_state.passo < len(perguntas):
@@ -187,34 +180,38 @@ else:
                 if cols[i].button(opt, key=f"qz_{st.session_state.passo}_{i}"):
                     st.session_state.analise.append(q['s'][opt]); st.session_state.passo += 1; st.rerun()
         else:
-            st.markdown("<div class='veredito-card'>", unsafe_allow_html=True)
-            st.markdown(f"<h3>O Veredito de {st.session_state.nome_user}</h3>", unsafe_allow_html=True)
+            st.markdown("<div class='ravengar-card'>", unsafe_allow_html=True)
             st.write(" ".join(st.session_state.analise))
             if st.button("REINICIAR JORNADA"): st.session_state.passo = 0; st.session_state.analise = []; st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- ABA 5: BIBLIOTECA SECRETA ---
+    # --- ABA 5: BIBLIOTECA SECRETA (CORRIGIDA) ---
     with tabs[4]:
-        st.markdown("""
-            <h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA DE RAVENGAR</h2>
-            <p style='text-align: center; font-style: italic;'>Nem todo conhecimento deve ser revelado… mas alguns fragmentos encontram você por um motivo.</p>
-            <hr style='border: 0.5px solid #FFD1DC;'>
-        """, unsafe_allow_html=True)
-
+        st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA DE RAVENGAR</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; font-style: italic;'>Nem todo conhecimento deve ser revelado… mas alguns fragmentos encontram-te por um motivo.</p>", unsafe_allow_html=True)
+        
         biblioteca = [
             {"id": "f1", "titulo": "❤️ Fragmento I — Os Sinais do Amor Oculto", "desc": "Nem todo sentimento é dito… mas sempre deixa rastros.", "botao": "🔓 Desbloquear agora", "link": "LINK_AQUI"},
-            {"id": "f2", "titulo": "🔥 Ritual II — O Desapego", "desc": "Liberte-se de quem ainda prende sua mente… e recupere seu poder.", "botao": "🔓 Acessar conhecimento", "link": "LINK_AQUI"},
+            {"id": "f2", "titulo": "🔥 Ritual II — O Desapego", "desc": "Liberta-te de quem ainda prende a tua mente… e recupera o teu poder.", "botao": "🔓 Acessar conhecimento", "link": "LINK_AQUI"},
             {"id": "f3", "titulo": "🌙 Fragmento III — Leis do Destino", "desc": "O que parece acaso… pode ser direção disfarçada.", "botao": "🔓 Ver o que está reservado", "link": "LINK_AQUI"},
-            {"id": "f4", "titulo": "🧠 Código IV — A Mente de Quem Deseja", "desc": "Entenda o que não é dito… mas pode ser sentido.", "botao": "🔓 Decifrar agora", "link": "LINK_AQUI"},
+            {"id": "f4", "titulo": "🧠 Código IV — A Mente de Quem Deseja", "desc": "Entende o que não é dito… mas pode ser sentido.", "botao": "🔓 Decifrar agora", "link": "LINK_AQUI"},
             {"id": "f5", "titulo": "🕯️ Fragmento V — Energia que Atrai e Afasta", "desc": "Algumas presenças aproximam… outras desaparecem sem explicação.", "botao": "🔓 Desbloquear leitura", "link": "LINK_AQUI"}
         ]
 
         for item in biblioteca:
-            with st.expander(item["titulo"]):
-                st.write(item["desc"])
-                if st.button(item["botao"], key=item["id"]):
-                    st.warning("""
-                        **🔮 Você está prestes a acessar um conhecimento restrito** Nem todos estão preparados para isso. Mas se você chegou até aqui… talvez exista um motivo.  
-                        👉 Este conteúdo pode mudar a forma como você enxerga suas relações, decisões e caminhos.
-                    """)
-                    st.markdown(f"**[Clique aqui para confirmar o acesso e baixar]({item['link']})**")
+            st.markdown(f"""
+                <div class='biblioteca-card'>
+                    <h4 style='margin-bottom: 5px;'>{item['titulo']}</h4>
+                    <p style='color: #666; font-size: 14px;'>{item['desc']}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(item["botao"], key=item["id"]):
+                st.warning(f"""
+                    **🔮 Estás prestes a aceder a um conhecimento restrito** Nem todos estão preparados para isto. Mas se chegaste aqui… talvez exista um motivo.  
+                    
+                    👉 Este conteúdo pode mudar a forma como vês as tuas relações e caminhos.
+                    
+                    **[CLICA AQUI PARA CONFIRMAR O ACESSO E DESCARREGAR]({item['link']})**
+                """)
+            st.markdown("<br>", unsafe_allow_html=True)
