@@ -60,28 +60,22 @@ st.markdown(f"""
         line-height: 1.8;
         font-size: 20px !important;
     }}
-
-    .saudacao-texto {{
-        text-align: center;
-        font-size: 20px !important;
-        color: #555555 !important;
-        margin-bottom: 30px !important;
-    }}
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DE CONEXÃO REFINADA ---
+# --- 2. LÓGICA DE CONEXÃO BLINDADA ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
     prompts = {
-        "Amor": "Você é o Ravengar, um oráculo místico. No Amor, você fala sobre conexões de alma, feridas emocionais e o fluxo dos afetos. Seja profundo e empático.",
-        "Trabalho": "Você é o Ravengar. Na esfera do Trabalho, você é pragmático e estratégico. Fala sobre colheita, poder, autoridade e disciplina.",
-        "Futuro": "Você é o Ravengar. No Futuro, você é enigmático e visionário. Foque no destino e em eventos forjados nas sombras.",
-        "Saude": "Você é o Ravengar. Na Saúde, você foca no equilíbrio das energias, vitalidade e preservação do templo que é o corpo.",
-        "Decifrador": "Você é o Ravengar, o mestre dos símbolos. Sua missão é decifrar sonhos e enigmas revelando significados ocultos.",
-        "Intencao": "Você é o Ravengar. Sua visão atravessa máscaras sociais para revelar a real intenção por trás das ações."
+        "Amor": "Você é o Ravengar. Analise as conexões de alma e sentimentos do usuário. Você é um observador frio e místico.",
+        "Trabalho": "Você é o Ravengar. Analise estratégia e poder. Você não dá conselhos amigáveis, você revela verdades de mercado.",
+        "Futuro": "Você é o Ravengar. Você vê o que o tempo esconde. Suas palavras são decretos do destino.",
+        "Saude": "Você é o Ravengar. Analise o templo carnal e a energia vital.",
+        "Decifrador": "Você é o Ravengar. Traduza símbolos e sonhos para a realidade do usuário.",
+        "Intencao": "VOCÊ É O RAVENGAR. FOCO TOTAL: Analise a pessoa que o usuário mencionou. Você NUNCA fala de si mesmo. Se o usuário disser 'ela me procura' ou 'por que me procura?', ele está falando do ALVO da análise, não de você. Você não procura ninguém, você apenas habita a tenda."
     }
+    
     sistema = prompts.get(setor, "Você é o Ravengar, um oráculo místico.")
-    sistema += f" O usuário se chama {st.session_state.nome_user} e se identifica no gênero {st.session_state.genero_user}."
+    sistema += f" Nome do usuário: {st.session_state.nome_user}. Gênero: {st.session_state.genero_user}. REGRAS: Nunca saia do personagem. Nunca aja como um assistente de IA. Nunca diga que você 'procura' o usuário."
 
     try:
         client = Groq(api_key=api_key)
@@ -91,12 +85,18 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
         )
         return completion.choices[0].message.content
     except Exception as e:
-        return f"Erro na conexão mística: {str(e)}"
+        return f"A conexão mística foi interrompida: {str(e)}"
 
-# --- 3. BARRA LATERAL ---
+# --- 3. BARRA LATERAL COM RESET ---
 with st.sidebar:
     st.markdown("### 🍷 Conexão")
     chave_api = st.text_input("Chave Groq API", type="password")
+    
+    st.markdown("---")
+    if st.button("🔄 REINICIAR SESSÃO"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
 
 # --- 4. FLUXO DE ENTRADA ---
 if 'usuario_identificado' not in st.session_state:
@@ -117,11 +117,10 @@ else:
     # --- 5. INTERFACE PRINCIPAL ---
     st.markdown("<h1 style='text-align: center; margin-bottom: 0px;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
     saudacao = "Seja muito bem-vindo" if st.session_state.genero_user == "Masculino" else "Seja muito bem-vinda"
-    st.markdown(f"<p class='saudacao-texto'>{saudacao}, <b>{st.session_state.nome_user}</b>.</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center; font-size: 20px; color: #555555;'>{saudacao}, <b>{st.session_state.nome_user}</b>.</p>", unsafe_allow_html=True)
 
     tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
 
-    # --- ABA 1, 2 e 3 (Mantidas conforme versões anteriores) ---
     with tab1:
         st.markdown("### Escolha sua Esfera")
         c1, c2, c3, c4 = st.columns(4)
@@ -189,7 +188,6 @@ else:
                     st.session_state['historico'].append({"role": "ravengar", "content": res})
                     st.rerun()
 
-    # --- ABA 4: QUIZ PSICOLÓGICO ATUALIZADO ---
     with tab4:
         if 'passo' not in st.session_state:
             st.session_state.passo, st.session_state.analise = 0, []
@@ -204,11 +202,9 @@ else:
             {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera com planejamento e ordem.", "Terra": "Seu espírito vibra no imprevisível e na liberdade."}},
             {"p": "Você avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": "Suas ambições são vastas e seu potencial de conquista é imenso.", "Pequena": "Sua alma entende que a verdadeira plenitude reside no essencial."}},
             {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": f"Você é {reser}, mantendo um escudo necessário para proteger o seu interior.", "Não": "Você é uma pessoa aberta às trocas e acredita na transparência."}},
-            # AQUI ESTÁ A INCLUSÃO DE CONTEXTO QUE VOCÊ PEDIU
             {"p": "Você decide entrar na casa... A mesa dentro dela está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão emocional.", "Vazia": "Você atravessa uma fase de busca e introspecção profunda."}},
             {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você é uma pessoa saudosista e valoriza o que moldou seu passado.", "Ignora": "Seu foco é o horizonte à frente, sem carregar fardos antigos."}},
             {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada e cuidadosa.", "Metal": "Sua lealdade é inquebrável, forjada para resistir a tempestades."}},
-            # AQUI ESTÁ O AJUSTE DE TEXTO QUE VOCÊ PEDIU
             {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla"], "s": {"Mergulha": "Você se entrega de corpo e alma nos relacionamentos.", "Toca a água": "Você domina o equilíbrio entre sentir e agir.", "Contempla": f"Sua essência é de um observador {reser} que protege sua energia."}}
         ]
 
@@ -225,7 +221,7 @@ else:
             st.markdown("<div class='veredito-card'>", unsafe_allow_html=True)
             st.markdown(f"<h2 style='text-align: center;'>O Veredito para {st.session_state.nome_user}</h2>", unsafe_allow_html=True)
             st.write(" ".join(st.session_state.analise))
-            if st.button("REINICIAR JORNADA"):
+            if st.button("REINICIAR JORNADA", key="reset_quiz"):
                 st.session_state.passo = 0
                 st.session_state.analise = []
                 st.rerun()
