@@ -9,27 +9,18 @@ st.markdown("""
     header {visibility: hidden;}
     .stApp { background-color: #F7F7F7 !important; }
     
-    /* Fonte reta e limpa para todo o app */
-    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label {
+    /* FONTE RETA E PADRONIZADA (IGUAL ÀS ESFERAS) */
+    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         color: #000000 !important;
     }
 
-    /* Pergunta do Quiz: Centralizada, Grande e Reta */
-    .quiz-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 0;
-    }
     .quiz-pergunta {
         font-size: 28px !important;
         font-weight: 600 !important;
-        color: #000000 !important;
-        text-align: center !important;
-        margin-bottom: 40px !important;
-        line-height: 1.5;
+        text-align: left !important;
+        margin-bottom: 35px !important;
+        line-height: 1.4;
     }
     
     div.stButton > button {
@@ -40,19 +31,19 @@ st.markdown("""
         border-radius: 12px !important;
         width: 100%;
         height: 50px;
-        transition: 0.3s;
         font-size: 18px !important;
     }
     
+    /* CARD DO VEREDITO: FONTE RETA E LIMPA */
     .ravengar-card {
         background-color: #FFFFFF !important;
         border: 2px solid #FFD1DC !important;
         padding: 30px;
         border-radius: 15px;
-        color: #000000 !important;
         box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
         line-height: 1.8;
-        font-size: 19px;
+        font-size: 20px !important;
+        font-weight: 400 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -79,8 +70,48 @@ st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsaf
 
 tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
 
-# --- ABAS 1, 2 E 3 (Omitidas aqui para brevidade, mas devem ser mantidas no seu arquivo) ---
-# ... (Mantenha o código das outras abas igual ao anterior)
+# --- ABA 1, 2 e 3 (Mantendo as funcionalidades anteriores) ---
+with tab1:
+    st.markdown("### Selecione a Esfera")
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: 
+        if st.button("❤️ AMOR"): st.session_state.setor = "Amor"
+    with c2: 
+        if st.button("💼 TRABALHO"): st.session_state.setor = "Trabalho"
+    with c3: 
+        if st.button("⚖️ EMPREGO"): st.session_state.setor = "Emprego"
+    with c4: 
+        if st.button("🌿 SAÚDE"): st.session_state.setor = "Saúde"
+    setor = st.session_state.get('setor', 'Destino')
+    pergunta_ora = st.text_area("O que as sombras devem revelar?", key="ora_input")
+    if st.button("PROFERIR VEREDITO"):
+        if chave_api:
+            res = consultar_ravengar(f"Você é o Ravengar. Responda sobre {setor}.", pergunta_ora, chave_api)
+            st.markdown(f"<div class='ravengar-card'>{res}</div>", unsafe_allow_html=True)
+
+with tab2:
+    st.markdown("### 👁️ O Decifrador")
+    texto_dec = st.text_area("Insira o enigma, sonho ou mensagem:", key="dec_input")
+    if st.button("DECIFRAR MISTÉRIO"):
+        if chave_api:
+            res = consultar_ravengar("Você é o Ravengar, decifrador de símbolos.", texto_dec, chave_api)
+            st.markdown(f"<div class='ravengar-card'>{res}</div>", unsafe_allow_html=True)
+
+with tab3:
+    st.markdown("### 🔥 Teste de Intenção Real")
+    col_a, col_b = st.columns(2)
+    with col_a: nome_alvo = st.text_input("Nome da pessoa:", key="nome_alvo_int")
+    with col_b: genero_int = st.radio("Essa pessoa é:", ["Homem", "Mulher"], key="gen_int")
+    comportamento = st.text_area("Descreva o comportamento suspeito:", key="comp_input")
+    if st.button("DEVASSAR INTENÇÃO"):
+        if chave_api and comportamento:
+            prompt_init = f"Você é o Ravengar. Analise as intenções de {nome_alvo}."
+            res_inicial = consultar_ravengar(prompt_init, comportamento, chave_api)
+            st.session_state['historico'] = [{"role": "ravengar", "content": res_inicial}]
+    if 'historico' in st.session_state:
+        for msg in st.session_state['historico']:
+            if msg['role'] == "ravengar":
+                st.markdown(f"<div class='ravengar-card'>**Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
 # --- ABA 4: QUIZ PSICOLÓGICO ---
 with tab4:
@@ -88,57 +119,46 @@ with tab4:
         st.session_state.quiz_iniciado = False
 
     if not st.session_state.quiz_iniciado:
-        st.markdown("<div style='max-width: 500px; margin: 0 auto;'>", unsafe_allow_html=True)
         st.markdown("### 🧠 Identifique-se")
         nome_user = st.text_input("Qual é o seu nome?")
         genero_user = st.radio("Como você se identifica?", ["Masculino", "Feminino"])
         if st.button("INICIAR JORNADA"):
             if nome_user:
-                st.session_state.nome_user = nome_user
-                st.session_state.genero_user = genero_user
-                st.session_state.quiz_iniciado = True
-                st.session_state.passo = 0
-                st.session_state.analise = []
+                st.session_state.nome_user, st.session_state.genero_user = nome_user, genero_user
+                st.session_state.quiz_iniciado, st.session_state.passo, st.session_state.analise = True, 0, []
                 st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
     else:
         g = st.session_state.genero_user
-        art = "o" if g == "Masculino" else "a"
-        um = "um" if g == "Masculino" else "uma"
-        guerr = "guerreiro" if g == "Masculino" else "guerreira"
-        preparado = "preparado" if g == "Masculino" else "preparada"
-        reservado = "reservado" if g == "Masculino" else "reservada"
+        art, um, guerr, prep, reser = ("o", "um", "guerreiro", "preparado", "reservado") if g == "Masculino" else ("a", "uma", "guerreira", "preparada", "reservada")
 
         perguntas = [
-            {"p": f"{st.session_state.nome_user}, você caminha pela floresta... você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Você possui uma essência de independência, alguém que encontra força no próprio silêncio.", "Com alguém": "Você valoriza a presença e o suporte, entendendo que a vida ganha sentido no compartilhamento."}},
-            {"p": "Você vê um animal na sua frente, qual é esse animal?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente vê desafios como batalhas, agindo como {um} legítimo {guerr}.", "Coelho": "Sua natureza busca refúgio na calma, preferindo rotas onde a paz seja prioridade.", "Pássaro": "Você detém uma agilidade mental rara, capaz de superar obstáculos com leveza."}},
-            {"p": "A sua reação ao ver o animal é:", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "Sua inteligência é movida pela cautela; você sabe que recuar é estratégia.", "Permanecer": f"Você carrega a firmeza de quem não se abala, mantendo-se {preparado}."}},
-            {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera sob a lógica da segurança, preferindo saber onde pisa.", "Terra": "Seu espírito vibra no imprevisível; você encontra beleza na incerteza."}},
-            {"p": "Você avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": f"Suas ambições são vastas; você foi feit{art} para ocupar grandes lugares.", "Pequena": "Sua alma entende que a plenitude reside no essencial e no aconchego."}},
-            {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": "Você é seletivo com sua privacidade, protegendo seu valioso interior.", "Não": "Você é uma pessoa aberta ao fluxo da vida e à transparência."}},
-            {"p": "A mesa dentro da casa está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento, com necessidades emocionais supridas.", "Vazia": "Você atravessa uma fase de busca, sentindo que algo ainda falta."}},
-            {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você respeita o passado, entendendo que cada fragmento construiu quem você é.", "Ignora": f"Seu foco é o horizonte; você não se permite ser detid{art} por fardos antigos."}},
-            {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada, tratando laços como algo precioso.", "Metal": "Sua lealdade é inquebrável; vínculos forjados para resistir a tempestades."}},
-            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla a margem"], "s": {"Mergulha": f"Sua entrega é visceral; você mergulha de cabeça nas emoções.", "Toca a água": "Você domina o equilíbrio entre sentir e agir no mundo.", "Contempla a margem": f"Você é {reservado} e prefere entender o terreno antes de se envolver."}}
+            {"p": f"{st.session_state.nome_user}, você caminha pela floresta... você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Você possui uma essência de independência, alguém que encontra força no próprio silêncio para cruzar qualquer destino.", "Com alguém": "Você valoriza a presença e o suporte, entendendo que a vida ganha mais sentido através do compartilhamento."}},
+            {"p": "Você vê um animal na sua frente, qual é esse animal?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente vê desafios como batalhas a serem vencidas, agindo com a postura de quem domina o espaço como {um} legítimo {guerr}.", "Coelho": "Sua natureza busca refúgio na calma e na diplomacia, preferindo rotas onde a paz seja a prioridade.", "Pássaro": "Você detém uma agilidade mental rara, capaz de superar obstáculos com uma leveza que os outros não compreendem."}},
+            {"p": "A sua reação ao ver o animal é:", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "Sua inteligência é movida pela cautela estratégica; você sabe que recuar muitas vezes é o segredo da sobrevivência.", "Permanecer": f"Você carrega a firmeza de quem não se deixa abalar, mantendo-se {prep} para encarar o desconhecido."}},
+            {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera sob a lógica da segurança e do planejamento, preferindo saber exatamente para onde o caminho leva.", "Terra": "Seu espírito vibra no imprevisível; você encontra beleza na incerteza e na liberdade de criar seu próprio rastro."}},
+            {"p": "Você segue caminhando e avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": f"Suas ambições são vastas e seu potencial de conquista é imenso; você foi feit{art} para ocupar grandes lugares.", "Pequena": "Sua alma entende que a verdadeira plenitude reside no essencial e na tranquilidade de um refúgio acolhedor."}},
+            {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": "Você é seletivo com sua privacidade, mantendo um escudo necessário para proteger o que há de mais valioso em seu interior.", "Não": "Você é uma pessoa aberta às trocas e ao fluxo da vida, acreditando na transparência como forma de conexão."}},
+            {"p": "Você entra na casa e avista uma mesa. Ela está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão, sentindo que suas necessidades emocionais estão sendo supridas.", "Vazia": "Você atravessa uma fase de busca e introspecção, talvez sentindo que ainda falta algo para completar seu cenário atual."}},
+            {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você respeita o passado e os legados, entendendo que cada fragmento do que passou ajuda a construir quem você é.", "Ignora": f"Seu foco é o horizonte à frente; você não se permite ser detid{art} por fardos que já não fazem parte do seu agora."}},
+            {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada e cuidadosa, tratando os laços como algo precioso que não pode ser negligenciado.", "Metal": "Para você, a lealdade é inquebrável; seus vínculos são forjados para resistir a qualquer tempestade."}},
+            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla a margem"], "s": {"Mergulha": f"Sua entrega é visceral; você mergulha de cabeça nas emoções e vive as experiências com máxima intensidade.", "Toca a água": "Você domina o equilíbrio entre sentir e agir, mantendo o controle emocional enquanto experimenta o mundo.", "Contempla a margem": f"Sua essência é de um observador silencioso; você é {reser} e prefere entender o terreno e proteger sua energia antes de se envolver."}}
         ]
 
         if st.session_state.passo < len(perguntas):
             q = perguntas[st.session_state.passo]
-            
-            # Pergunta centralizada no meio
-            st.markdown(f"<div class='quiz-container'><div class='quiz-pergunta'>{q['p']}</div></div>", unsafe_allow_html=True)
-            
+            st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
             cols = st.columns(len(q['o']))
             for i, opt in enumerate(q['o']):
-                if cols[i].button(opt, key=f"q_center_{st.session_state.passo}_{i}"):
+                if cols[i].button(opt, key=f"q_fin_{st.session_state.passo}_{i}"):
                     st.session_state.analise.append(q['s'][opt])
                     st.session_state.passo += 1
                     st.rerun()
         else:
             st.markdown("<div class='ravengar-card'>", unsafe_allow_html=True)
-            st.markdown(f"<h2 style='text-align: center;'>🔮 Veredito de {st.session_state.nome_user}</h2>", unsafe_allow_html=True)
-            st.write(f"Ravengar sussurra: *\"{' '.join(st.session_state.analise)}\"*")
-            if st.button("REINICIAR"):
+            st.markdown(f"<h2 style='text-align: center; margin-bottom:20px;'>O Veredito para {st.session_state.nome_user}</h2>", unsafe_allow_html=True)
+            # RESPOSTA FINAL RETA E PADRONIZADA
+            st.write(" ".join(st.session_state.analise))
+            if st.button("REINICIAR JORNADA"):
                 st.session_state.quiz_iniciado = False
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
