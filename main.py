@@ -3,21 +3,22 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (MANTIDO INTACTO COM AJUSTE DE SIDEBAR) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (CORREÇÃO DA BARRA LATERAL) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
     <style>
-    /* Esconde o header mas garante que o botão da sidebar apareça corretamente */
+    /* Esconde a linha e decorações do header, mas MANTÉM o botão da sidebar */
     header[data-testid="stHeader"] {{
         background-color: rgba(0,0,0,0) !important;
-        visibility: hidden;
+        color: transparent !important;
     }}
     
-    /* Garante que o ícone da barra lateral (setinha) seja visível e estilizado */
+    /* Força o botão da setinha a aparecer e ficar na cor rosa */
     button[data-testid="stSidebarCollapseButton"] {{
         visibility: visible !important;
         color: #FFB7C5 !important;
+        background-color: transparent !important;
     }}
 
     .stApp {{ background-color: #F7F7F7 !important; }}
