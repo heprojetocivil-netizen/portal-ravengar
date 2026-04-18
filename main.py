@@ -78,7 +78,7 @@ st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsaf
 
 tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
 
-# ... (Abas 1 e 2 permanecem iguais)
+# ... (Abas 1 e 2)
 with tab1:
     st.markdown("### Selecione a Esfera")
     c1, c2, c3, c4 = st.columns(4)
@@ -130,7 +130,7 @@ with tab3:
                 st.session_state['historico'].append({"role": "ravengar", "content": nova_res})
                 st.rerun()
 
-# --- ABA 4: QUIZ PSICOLÓGICO COM NOVAS FRASES ---
+# --- ABA 4: QUIZ PSICOLÓGICO (REVISADO) ---
 with tab4:
     if 'quiz_iniciado' not in st.session_state:
         st.session_state.quiz_iniciado = False
@@ -146,17 +146,17 @@ with tab4:
                 st.rerun()
     else:
         g = st.session_state.genero_user
-        art, um, guerr, prep, reser = ("o", "um", "guerreiro", "preparado", "reservado") if g == "Masculino" else ("a", "uma", "guerreira", "preparada", "reservada")
+        art, um, guerr, prep, reser, leg = ("o", "um", "guerreiro", "preparado", "reservado", "legítimo") if g == "Masculino" else ("a", "uma", "guerreira", "preparada", "reservada", "legítima")
         
         perguntas = [
             {"p": f"{st.session_state.nome_user}, você caminha pela floresta... você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Você possui uma essência de independência, alguém que encontra força no próprio silêncio para cruzar qualquer destino.", "Com alguém": "Você valoriza a presença das pessoas, entendendo que a vida ganha mais sentido através do compartilhamento."}},
-            {"p": "Você vê um animal na sua frente, qual é esse animal?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente vê desafios como batalhas a serem vencidas, agindo com a postura de quem domina o espaço como {um} legítimo {guerr}.", "Coelho": "Sua natureza busca refúgio na calma e na diplomacia, preferindo rotas onde a paz seja a prioridade.", "Pássaro": "Você detém uma agilidade mental rara, capaz de superar obstáculos com uma leveza que os outros não compreendem."}},
+            {"p": "Você vê um animal na sua frente, qual é esse animal?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente vê desafios como batalhas a serem vencidas, agindo com a postura de quem domina o espaço como {um} {leg} {guerr}.", "Coelho": "Sua natureza busca refúgio na calma e na diplomacia, preferindo rotas onde a paz seja a prioridade.", "Pássaro": "Você detém uma agilidade mental rara, capaz de superar obstáculos com uma leveza que os outros não compreendem."}},
             {"p": "A sua reação ao ver o animal é:", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "Sua inteligência é movida pela cautela estratégica; você sabe que recuar muitas vezes é o segredo da sobrevivência.", "Permanecer": "Você não teme o desconhecido."}},
             {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera com planejamento, preferindo saber exatamente para onde o caminho leva.", "Terra": "Seu espírito vibra no imprevisível; você encontra beleza na incerteza e na liberdade de criar seu próprio rastro."}},
             {"p": "Você avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": f"Suas ambições são vastas e seu potencial de conquista é imenso; você tem grandes aspirações.", "Pequena": "Sua alma entende que a verdadeira plenitude reside no essencial e na tranquilidade de um refúgio acolhedor."}},
             {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": "Você é reservado, mantendo um escudo necessário para proteger o que há de mais valioso em seu interior.", "Não": "Você é uma pessoa aberta às trocas e ao fluxo da vida, acreditando na transparência como forma de conexão."}},
             {"p": "A mesa dentro da casa está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão, sentindo que suas necessidades emocionais estão sendo supridas.", "Vazia": "Você atravessa uma fase de busca e introspecção, talvez sentindo que ainda falta algo para completar seu cenário atual."}},
-            {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você é uma pessoa saudosista, e entende que cada fragmento do passado ajudou a moldar quem você é.", "Ignora": f"Seu foco é o horizonte à frente; você não se permite ser detid{art} por fardos que já não fazem parte do seu agora."}},
+            {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você é uma pessoa saudosista, e entende que cada fragmento do passado ajudou a moldar quem você é hoje.", "Ignora": f"Seu foco é o horizonte à frente; você não se permite ser detid{art} por fardos que já não fazem parte do seu agora."}},
             {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada e cuidadosa, tratando os laços como algo precioso que não pode ser negligenciado.", "Metal": "Para você, a lealdade é inquebrável; seus vínculos são forjados para resistir a qualquer tempestade."}},
             {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla a margem"], "s": {"Mergulha": f"Sua entrega é visceral; você mergulha de cabeça nas emoções e vive as experiências com máxima intensidade.", "Toca a água": "Você domina o equilíbrio entre sentir e agir, mantendo o controle emocional enquanto desbrava o mundo.", "Contempla a margem": f"Sua essência é de um observador silencioso; você é {reser} e prefere entender o terreno e proteger sua energia antes de se envolver."}}
         ]
