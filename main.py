@@ -121,6 +121,7 @@ else:
 
     tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
 
+    # --- ABA 1, 2 e 3 (Mantidas conforme versões anteriores) ---
     with tab1:
         st.markdown("### Escolha sua Esfera")
         c1, c2, c3, c4 = st.columns(4)
@@ -188,6 +189,7 @@ else:
                     st.session_state['historico'].append({"role": "ravengar", "content": res})
                     st.rerun()
 
+    # --- ABA 4: QUIZ PSICOLÓGICO ATUALIZADO ---
     with tab4:
         if 'passo' not in st.session_state:
             st.session_state.passo, st.session_state.analise = 0, []
@@ -197,15 +199,17 @@ else:
         
         perguntas = [
             {"p": f"{st.session_state.nome_user}, você caminha pela floresta... você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Você possui uma essência de independência, alguém que encontra força no próprio silêncio.", "Com alguém": "Você valoriza a presença das pessoas, entendendo que a vida ganha sentido através do compartilhamento."}},
-            {"p": "Você vê um animal na sua frente, qual é?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente vê desafios como batalhas a serem vencidas, agindo como {um} {leg} {guerr}.", "Coelho": "Sua natureza busca refúgio na calma e na diplomacia.", "Pássaro": "Você detém uma agilidade mental rara, capaz de superar obstáculos com leveza."}},
+            {"p": "Você vê um animal na sua frente, qual é?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente vê desafios como batalhas a serem vencidas, agindo com a postura de quem domina o espaço como {um} {leg} {guerr}.", "Coelho": "Sua natureza busca refúgio na calma e na diplomacia.", "Pássaro": "Você detém uma agilidade mental rara, capaz de superar obstáculos com leveza."}},
             {"p": "A sua reação ao ver o animal é:", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "Sua inteligência é movida pela cautela estratégica.", "Permanecer": "Você não teme o desconhecido."}},
             {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera com planejamento e ordem.", "Terra": "Seu espírito vibra no imprevisível e na liberdade."}},
             {"p": "Você avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": "Suas ambições são vastas e seu potencial de conquista é imenso.", "Pequena": "Sua alma entende que a verdadeira plenitude reside no essencial."}},
             {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": f"Você é {reser}, mantendo um escudo necessário para proteger o seu interior.", "Não": "Você é uma pessoa aberta às trocas e acredita na transparência."}},
-            {"p": "A mesa dentro da casa está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão emocional.", "Vazia": "Você atravessa uma fase de busca e introspecção profunda."}},
+            # AQUI ESTÁ A INCLUSÃO DE CONTEXTO QUE VOCÊ PEDIU
+            {"p": "Você decide entrar na casa... A mesa dentro dela está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão emocional.", "Vazia": "Você atravessa uma fase de busca e introspecção profunda."}},
             {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você é uma pessoa saudosista e valoriza o que moldou seu passado.", "Ignora": "Seu foco é o horizonte à frente, sem carregar fardos antigos."}},
-            {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada e preciosa.", "Metal": "Sua lealdade é inquebrável, forjada para resistir a tempestades."}},
-            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla"], "s": {"Mergulha": "Sua entrega é visceral e intensa.", "Toca a água": "Você domina o equilíbrio entre sentir e agir.", "Contempla": f"Sua essência é de um observador {reser} que protege sua energia."}}
+            {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada e cuidadosa.", "Metal": "Sua lealdade é inquebrável, forjada para resistir a tempestades."}},
+            # AQUI ESTÁ O AJUSTE DE TEXTO QUE VOCÊ PEDIU
+            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla"], "s": {"Mergulha": "Você se entrega de corpo e alma nos relacionamentos.", "Toca a água": "Você domina o equilíbrio entre sentir e agir.", "Contempla": f"Sua essência é de um observador {reser} que protege sua energia."}}
         ]
 
         if st.session_state.passo < len(perguntas):
