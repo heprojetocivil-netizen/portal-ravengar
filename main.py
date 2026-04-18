@@ -3,12 +3,22 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (CORRIGIDO PARA MANTER A BARRA LATERAL ACESSÍVEL) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (BARRA LATERAL CORRIGIDA) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
     <style>
-    /* Linha do header removida para não esconder o botão da barra lateral */
+    /* Estilização do Header para mostrar a Seta e ocultar textos do sistema */
+    header[data-testid="stHeader"] {{
+        background-color: rgba(0,0,0,0) !important;
+        color: #FFB7C5 !important;
+    }}
+    
+    /* Garante que o botão da barra lateral (a seta) seja visível e rosa */
+    button[kind="header"] {{
+        color: #FFB7C5 !important;
+    }}
+
     .stApp {{ background-color: #F7F7F7 !important; }}
     
     html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
@@ -64,7 +74,7 @@ st.markdown(f"""
 # --- 2. LÓGICA DO MURAL GLOBAL (UM ESCREVE, TODOS VEEM) ---
 @st.cache_resource
 def obter_mural_global():
-    return [] # Esta lista fica na memória do servidor, compartilhada por todos os usuários
+    return [] 
 
 mural_global = obter_mural_global()
 
