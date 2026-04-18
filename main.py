@@ -53,28 +53,11 @@ st.markdown(f"""
 
 # --- 2. LÓGICA DE CONEXÃO (PERSONALIZADA POR ESFERA) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
-    # Aqui personalizamos a "alma" do Ravengar para cada esfera
     prompts = {
-        "Amor": (
-            "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática. "
-            "Falas sobre fios do destino, batimentos de coração e conexões de alma. "
-            "Teu tom é acolhedor, mas revelador sobre sentimentos ocultos."
-        ),
-        "Trabalho": (
-            "És o Ravengar, o Estrategista das Sombras. Tua linguagem é direta, fria e focada em poder e território. "
-            "Falas sobre movimentos de xadrez, colheita de esforços e a balança da justiça profissional. "
-            "Teu tom é assertivo e focado em resultados e ambição."
-        ),
-        "Futuro": (
-            "És o Ravengar, o Profeta do Tempo. Tua linguagem é enigmática, vasta e mística. "
-            "Falas sobre constelações, areias do tempo e o que está escrito no éter. "
-            "Teu tom é solene, avisando que o destino é uma estrada que se constrói ao caminhar."
-        ),
-        "Saude": (
-            "És o Ravengar, o Alquimista da Vitalidade. Tua linguagem é serena, focada em equilíbrio e fluxos de energia. "
-            "Falas sobre o templo interior, chakras e a harmonia entre o espírito e a matéria. "
-            "Teu tom é curativo e equilibrado."
-        ),
+        "Amor": "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética e profunda. Falas sobre fios do destino e conexões de alma.",
+        "Trabalho": "És o Ravengar, o Estrategista das Sombras. Tua linguagem é direta e focada em poder, estratégia e território.",
+        "Futuro": "És o Ravengar, o Profeta do Tempo. Tua linguagem é enigmática e mística, falando sobre o que o tempo esconde.",
+        "Saude": "És o Ravengar, o Alquimista da Vitalidade. Tua linguagem é serena, focada em equilíbrio e energia vital.",
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
         "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria."
     }
@@ -151,26 +134,31 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 3: DETETIVE VIRTUAL ---
+    # --- ABA 3: DETETIVE VIRTUAL (COM HISTÓRICO) ---
     with tabs[2]:
-        nome_alvo = st.text_input("Quem vamos investigar?")
-        comp = st.text_area("Descreve o comportamento:")
+        if 'historico_detetive' not in st.session_state:
+            st.session_state.historico_detetive = []
+            
+        nome_alvo = st.text_input("Quem vamos investigar?", key="alvo_detetive")
+        comp = st.text_area("Descreve o comportamento:", key="comp_detetive")
+        
         if st.button("INICIAR INVESTIGAÇÃO"):
             if chave_api and comp:
-                st.session_state['chat_det'] = [{"content": consultar_ravengar(f"Investigar {nome_alvo}: {comp}", chave_api, "Detetive")}]
-        if 'chat_det' in st.session_state:
-            for msg in st.session_state['chat_det']:
-                st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+                resposta = consultar_ravengar(f"Investigar {nome_alvo}: {comp}", chave_api, "Detetive")
+                st.session_state.historico_detetive.append({"alvo": nome_alvo, "relatorio": resposta})
+        
+        for item in reversed(st.session_state.historico_detetive):
+            st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório ({item['alvo']}):**<br>{item['relatorio']}</div>", unsafe_allow_html=True)
 
-    # --- ABA 4: QUIZ PSICOLÓGICO ---
+    # --- ABA 4: QUIZ PSICOLÓGICO (COM TÍTULO ATUALIZADO) ---
     with tabs[3]:
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
         
         if not st.session_state.quiz_iniciado:
             st.markdown("<div style='text-align: center; padding: 40px;'>", unsafe_allow_html=True)
-            st.markdown("## Você acha que se conhece bem? 🤔")
-            st.markdown("#### Faça o nosso teste e descubra camadas da sua personalidade que você nunca percebeu.")
-            if st.button("CLIQUE PARA INICIAR"):
+            st.markdown("## Você acha que sabe tudo sobre você? 🤔")
+            st.markdown("#### Faça o nosso quiz e descubra várias camadas na sua personalidade.")
+            if st.button("INICIAR"):
                 st.session_state.quiz_iniciado = True
                 st.session_state.passo = 0
                 st.session_state.analise = []
