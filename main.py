@@ -78,7 +78,7 @@ st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsaf
 
 tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
 
-# ... (Abas 1 e 2)
+# --- ABA 1: ORÁCULO COM CHAT ---
 with tab1:
     st.markdown("### Selecione a Esfera")
     c1, c2, c3, c4 = st.columns(4)
@@ -87,50 +87,84 @@ with tab1:
     with c2: 
         if st.button("💼 TRABALHO"): st.session_state.setor = "Trabalho"
     with c3: 
-        if st.button("⚖️ EMPREGO"): st.session_state.setor = "Emprego"
+        if st.button("✨ FUTURO"): st.session_state.setor = "Futuro"
     with c4: 
         if st.button("🌿 SAÚDE"): st.session_state.setor = "Saúde"
+    
     setor = st.session_state.get('setor', 'Destino')
     pergunta_ora = st.text_area("O que as sombras devem revelar?", key="ora_input")
-    if st.button("PROFERIR VEREDITO"):
-        if chave_api:
+    
+    if st.button("PROFERIR VEREDITO", key="btn_ora"):
+        if chave_api and pergunta_ora:
             res = consultar_ravengar(f"Você é o Ravengar. Responda sobre {setor}.", pergunta_ora, chave_api)
-            st.markdown(f"<div class='ravengar-card'>{res}</div>", unsafe_allow_html=True)
+            st.session_state['chat_ora'] = [{"role": "ravengar", "content": res}]
 
+    if 'chat_ora' in st.session_state:
+        for msg in st.session_state['chat_ora']:
+            div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
+            st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            st.write("")
+        
+        with st.form(key="form_ora", clear_on_submit=True):
+            resp = st.text_input("Continue a conversa com o Oráculo:")
+            if st.form_submit_button("ENVIAR") and resp:
+                st.session_state['chat_ora'].append({"role": "user", "content": resp})
+                res = consultar_ravengar(f"Ravengar, sobre {setor}: {resp}", "Continue o diálogo místico.", chave_api)
+                st.session_state['chat_ora'].append({"role": "ravengar", "content": res})
+                st.rerun()
+
+# --- ABA 2: DECIFRADOR COM CHAT ---
 with tab2:
     st.markdown("### 👁️ O Decifrador")
     texto_dec = st.text_area("Insira o enigma, sonho ou mensagem:", key="dec_input")
-    if st.button("DECIFRAR MISTÉRIO"):
-        if chave_api:
+    
+    if st.button("DECIFRAR MISTÉRIO", key="btn_dec"):
+        if chave_api and texto_dec:
             res = consultar_ravengar("Você é o Ravengar, decifrador de símbolos.", texto_dec, chave_api)
-            st.markdown(f"<div class='ravengar-card'>{res}</div>", unsafe_allow_html=True)
+            st.session_state['chat_dec'] = [{"role": "ravengar", "content": res}]
 
+    if 'chat_dec' in st.session_state:
+        for msg in st.session_state['chat_dec']:
+            div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
+            st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            st.write("")
+        
+        with st.form(key="form_dec", clear_on_submit=True):
+            resp = st.text_input("Pergunte mais sobre este mistério:")
+            if st.form_submit_button("ENVIAR") and resp:
+                st.session_state['chat_dec'].append({"role": "user", "content": resp})
+                res = consultar_ravengar(f"Ravengar, decifrando: {resp}", "Continue a explicação mística.", chave_api)
+                st.session_state['chat_dec'].append({"role": "ravengar", "content": res})
+                st.rerun()
+
+# --- ABA 3: TESTE DE INTENÇÃO (MANTIDO) ---
 with tab3:
     st.markdown("### 🔥 Teste de Intenção Real")
     col_a, col_b = st.columns(2)
     with col_a: nome_alvo = st.text_input("Nome da pessoa:", key="nome_alvo_int")
     with col_b: genero_int = st.radio("Essa pessoa é:", ["Homem", "Mulher"], key="gen_int")
     comportamento = st.text_area("Descreva o comportamento suspeito:", key="comp_input")
+    
     if st.button("DEVASSAR INTENÇÃO"):
         if chave_api and comportamento:
             prompt_init = f"Você é o Ravengar. Analise as intenções de {nome_alvo}. Termine com uma pergunta provocativa."
             res_inicial = consultar_ravengar(prompt_init, comportamento, chave_api)
             st.session_state['historico'] = [{"role": "ravengar", "content": res_inicial}]
+    
     if 'historico' in st.session_state:
         for msg in st.session_state['historico']:
             div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
-            prefixo = "🔮 **Ravengar:**" if msg['role'] == "ravengar" else "👤 **Você:**"
-            st.markdown(f"<div class='{div_class}'>{prefixo}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            st.write("")
         with st.form(key="chat_intencao_rev", clear_on_submit=True):
             resp_usuario = st.text_input("Sua resposta para o Ravengar:")
             if st.form_submit_button("ENVIAR RESPOSTA") and resp_usuario:
                 st.session_state['historico'].append({"role": "user", "content": resp_usuario})
-                hist_texto = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state['historico']])
-                nova_res = consultar_ravengar(f"Ravengar, histórico: {hist_texto}", "Continue o diálogo de forma mística.", chave_api)
+                nova_res = consultar_ravengar(f"Ravengar, contexto: {resp_usuario}", "Continue o diálogo de forma mística.", chave_api)
                 st.session_state['historico'].append({"role": "ravengar", "content": nova_res})
                 st.rerun()
 
-# --- ABA 4: QUIZ PSICOLÓGICO (REVISADO) ---
+# --- ABA 4: QUIZ PSICOLÓGICO (MANTIDO) ---
 with tab4:
     if 'quiz_iniciado' not in st.session_state:
         st.session_state.quiz_iniciado = False
