@@ -51,18 +51,36 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DE CONEXÃO ---
+# --- 2. LÓGICA DE CONEXÃO (PERSONALIZADA POR ESFERA) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
+    # Aqui personalizamos a "alma" do Ravengar para cada esfera
     prompts = {
-        "Amor": "És o Ravengar. Analisa conexões de alma e sentimentos.",
-        "Trabalho": "És o Ravengar. Analisa estratégia e poder.",
-        "Futuro": "És o Ravengar. Vês o que o tempo esconde.",
-        "Saude": "És o Ravengar. Analisa a energia vital.",
-        "Decifrador": "És o Ravengar. Traduz símbolos e sonhos.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento da pessoa mencionada com precisão. Foca no alvo da investigação."
+        "Amor": (
+            "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática. "
+            "Falas sobre fios do destino, batimentos de coração e conexões de alma. "
+            "Teu tom é acolhedor, mas revelador sobre sentimentos ocultos."
+        ),
+        "Trabalho": (
+            "És o Ravengar, o Estrategista das Sombras. Tua linguagem é direta, fria e focada em poder e território. "
+            "Falas sobre movimentos de xadrez, colheita de esforços e a balança da justiça profissional. "
+            "Teu tom é assertivo e focado em resultados e ambição."
+        ),
+        "Futuro": (
+            "És o Ravengar, o Profeta do Tempo. Tua linguagem é enigmática, vasta e mística. "
+            "Falas sobre constelações, areias do tempo e o que está escrito no éter. "
+            "Teu tom é solene, avisando que o destino é uma estrada que se constrói ao caminhar."
+        ),
+        "Saude": (
+            "És o Ravengar, o Alquimista da Vitalidade. Tua linguagem é serena, focada em equilíbrio e fluxos de energia. "
+            "Falas sobre o templo interior, chakras e a harmonia entre o espírito e a matéria. "
+            "Teu tom é curativo e equilibrado."
+        ),
+        "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria."
     }
+    
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
-    sistema += f" Nome: {st.session_state.nome_user}."
+    sistema += f" Nome do consulente: {st.session_state.nome_user}."
 
     try:
         client = Groq(api_key=api_key)
@@ -192,7 +210,7 @@ else:
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- ABA 5: BIBLIOTECA SECRETA (RESTAURADA) ---
+    # --- ABA 5: BIBLIOTECA SECRETA ---
     with tabs[4]:
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         biblioteca = [
