@@ -143,6 +143,7 @@ with tab4:
         um = "um" if g == "Masculino" else "uma"
         guerr = "guerreiro" if g == "Masculino" else "guerreira"
         preparado = "preparado" if g == "Masculino" else "preparada"
+        reservado = "reservado" if g == "Masculino" else "reservada"
 
         perguntas = [
             {"p": f"{st.session_state.nome_user}, você caminha pela floresta... você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Você possui uma essência de independência, alguém que encontra força no próprio silêncio para cruzar qualquer destino.", "Com alguém": "Você valoriza a presença e o suporte, entendendo que a vida ganha mais sentido através do compartilhamento."}},
@@ -154,7 +155,7 @@ with tab4:
             {"p": "Você entra na casa e avista uma mesa. Ela está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão, sentindo que suas necessidades emocionais estão sendo supridas.", "Vazia": "Você atravessa uma fase de busca e introspecção, talvez sentindo que ainda falta algo para completar seu cenário atual."}},
             {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você respeita o passado e os legados, entendendo que cada fragmento do que passou ajuda a construir quem você é.", "Ignora": f"Seu foco é o horizonte à frente; você não se permite ser detid{art} por fardos que já não fazem parte do seu agora."}},
             {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada e cuidadosa, tratando os laços como algo precioso que não pode ser negligenciado.", "Metal": "Para você, a lealdade é inquebrável; seus vínculos são forjados para resistir a qualquer tempestade."}},
-            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Apenas olha"], "s": {"Mergulha": f"Sua entrega é visceral; você mergulha de cabeça nas emoções e vive as experiências com máxima intensidade.", "Toca a água": "Você domina o equilíbrio entre sentir e agir, mantendo o controle emocional enquanto experimenta o mundo.", "Apenas olha": "Sua racionalidade é seu guia; você prefere observar e analisar o cenário antes de se envolver emocionalmente."}}
+            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla a margem"], "s": {"Mergulha": f"Sua entrega é visceral; você mergulha de cabeça nas emoções e vive as experiências com máxima intensidade.", "Toca a água": "Você domina o equilíbrio entre sentir e agir, mantendo o controle emocional enquanto experimenta o mundo.", "Contempla a margem": f"Sua essência é de um observador silencioso; você é {reservado} e prefere entender o terreno e proteger sua energia antes de permitir qualquer envolvimento profundo."}}
         ]
 
         if st.session_state.passo < len(perguntas):
@@ -162,7 +163,7 @@ with tab4:
             st.write(f"### {q['p']}")
             cols = st.columns(len(q['o']))
             for i, opt in enumerate(q['o']):
-                if cols[i].button(opt, key=f"q_fin_final_{st.session_state.passo}_{i}"):
+                if cols[i].button(opt, key=f"q_final_fix_v2_{st.session_state.passo}_{i}"):
                     st.session_state.analise.append(q['s'][opt])
                     st.session_state.passo += 1
                     st.rerun()
