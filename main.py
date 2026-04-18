@@ -1,6 +1,7 @@
 import streamlit as st
 from groq import Groq
 import random
+from datetime import date
 
 # --- 1. CONFIGURAÇÃO E ESTILO ---
 st.set_page_config(page_title="Tenda do Ravengar",
@@ -93,8 +94,8 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
         ),
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
         "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria.",
-        "Noticias": "És o Ravengar. Atuas como um curador de informações. Resume notícias de forma mística, ácida e inteligente.",
-        "Tarot": "És o Ravengar, o mestre das cartas. Interpretas o Tarot de forma curta e impactante."
+        "Noticias": "És o Ravengar. Resume notícias reais de forma mística e ácida.",
+        "Tarot": "És o Ravengar. Interpretas a carta de Tarot sorteada com mistério e impacto diário."
     }
     
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
@@ -244,41 +245,39 @@ else:
                 st.warning(f"**Conhecimento Revelado:** [CLIQUE AQUI PARA BAIXAR]({item['link']})")
             st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- ABA 6: SEU ESPAÇO (NOVA FUNCIONALIDADE) ---
+    # --- ABA 6: SEU ESPAÇO ---
     with tabs[5]:
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
         
-        # 1. Escolha de Assunto e Notícias
         st.markdown("### 📰 Radar do Ravengar")
         tema_escolhido = st.selectbox("Escolha um assunto para curadoria:", ["Trabalho", "Amor", "Mistérios do Mundo"])
         if st.button("BUSCAR NO ÉTER"):
             if chave_api:
-                noticias = consultar_ravengar(f"Resuma 3 notícias reais e importantes de hoje sobre {tema_escolhido} com o seu tom místico.", chave_api, "Noticias")
+                noticias = consultar_ravengar(f"Resuma 3 notícias reais sobre {tema_escolhido}.", chave_api, "Noticias")
                 st.session_state['noticias_dia'] = noticias
-        
         if 'noticias_dia' in st.session_state:
             st.markdown(f"<div class='ravengar-card'>{st.session_state['noticias_dia']}</div>", unsafe_allow_html=True)
 
         st.markdown("---")
 
-        # 2. Tarot do Dia
         st.markdown("### 🃏 Tarot do Dia")
-        if st.button("PUXAR CARTA DO DIA"):
-            if chave_api:
-                cartas_tarot = ["O Mago", "A Sacerdotisa", "A Imperatriz", "O Imperador", "O Hierofante", "Os Enamorados", "O Carro", "A Justiça", "O Eremita", "A Roda da Fortuna", "A Força", "O Pendurado", "A Morte", "A Temperança", "O Diabo", "A Torre", "A Estrela", "A Lua", "O Sol", "O Julgamento", "O Mundo", "O Louco"]
-                carta_sorteada = random.choice(cartas_tarot)
-                interpretacao = consultar_ravengar(f"Saí com a carta '{carta_sorteada}'. Dê um veredito curto e místico para o meu dia.", chave_api, "Tarot")
-                st.session_state['carta_dia'] = (carta_sorteada, interpretacao)
+        data_hoje = str(date.today())
+        
+        if st.session_state.get('data_clique_tarot') != data_hoje:
+            if st.button("PUXAR CARTA DO DIA"):
+                if chave_api:
+                    cartas = ["O Mago", "A Sacerdotisa", "A Imperatriz", "O Imperador", "O Hierofante", "Os Enamorados", "O Carro", "A Justiça", "O Eremita", "A Roda da Fortuna", "A Força", "O Pendurado", "A Morte", "A Temperança", "O Diabo", "A Torre", "A Estrela", "A Lua", "O Sol", "O Julgamento", "O Mundo", "O Louco"]
+                    carta_sorteada = random.choice(cartas)
+                    res = consultar_ravengar(f"Carta '{carta_sorteada}'. Dê um veredito curto.", chave_api, "Tarot")
+                    st.session_state['carta_dia'] = (carta_sorteada, res)
+                    st.session_state['data_clique_tarot'] = data_hoje
+                    st.rerun()
+        else:
+            st.info("🔮 O destino já falou por hoje. Volte amanhã para ver se a sorte continua.")
 
-        if 'carta_dia' in st.session_state:
-            carta, texto = st.session_state['carta_dia']
-            st.markdown(f"""
-                <div class='ravengar-card' style='text-align: center;'>
-                    <h2 style='color: #FF69B4;'>{carta}</h2>
-                    <p>{texto}</p>
-                    <small><i>Volte amanhã para ver se a sorte continua ou mudou...</i></small>
-                </div>
-            """, unsafe_allow_html=True)
+        if 'carta_dia' in st.session_state and st.session_state.get('data_clique_tarot') == data_hoje:
+            c, t = st.session_state['carta_dia']
+            st.markdown(f"<div class='ravengar-card' style='text-align: center;'><h2>{c}</h2><p>{t}</p></div>", unsafe_allow_html=True)
 
     # --- 6. RODAPÉ ---
     st.markdown("---")
