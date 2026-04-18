@@ -53,6 +53,13 @@ st.markdown("""
         font-size: 22px !important;
         font-weight: 500 !important;
     }
+
+    .saudacao-texto {
+        text-align: center;
+        font-size: 20px !important;
+        color: #555555 !important;
+        margin-bottom: 30px !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -73,112 +80,124 @@ with st.sidebar:
     st.markdown("### 🍷 Conexão")
     chave_api = st.text_input("Chave Groq API", type="password")
 
-# --- 4. INTERFACE PRINCIPAL ---
-st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
+# --- 4. FLUXO DE ENTRADA ---
+if 'usuario_identificado' not in st.session_state:
+    st.session_state.usuario_identificado = False
 
-tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
-
-# --- ABA 1: ORÁCULO COM CHAT ---
-with tab1:
-    st.markdown("### Selecione a Esfera")
-    c1, c2, c3, c4 = st.columns(4)
-    with c1: 
-        if st.button("❤️ AMOR"): st.session_state.setor = "Amor"
-    with c2: 
-        if st.button("💼 TRABALHO"): st.session_state.setor = "Trabalho"
-    with c3: 
-        if st.button("✨ FUTURO"): st.session_state.setor = "Futuro"
-    with c4: 
-        if st.button("🌿 SAÚDE"): st.session_state.setor = "Saúde"
+if not st.session_state.usuario_identificado:
+    st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; margin-bottom: 20px;'><h3>Bem-vindo à Tenda.</h3><p>Identifique-se para que as sombras saibam quem você é.</p></div>", unsafe_allow_html=True)
     
-    setor = st.session_state.get('setor', 'Destino')
-    pergunta_ora = st.text_area("O que as sombras devem revelar?", key="ora_input")
+    nome_input = st.text_input("Seu nome:")
+    genero_input = st.radio("Seu gênero:", ["Masculino", "Feminino"])
     
-    if st.button("PROFERIR VEREDITO", key="btn_ora"):
-        if chave_api and pergunta_ora:
-            res = consultar_ravengar(f"Você é o Ravengar. Responda sobre {setor}.", pergunta_ora, chave_api)
-            st.session_state['chat_ora'] = [{"role": "ravengar", "content": res}]
+    if st.button("ENTRAR NA TENDA"):
+        if nome_input:
+            st.session_state.nome_user = nome_input
+            st.session_state.genero_user = genero_input
+            st.session_state.usuario_identificado = True
+            st.rerun()
+        else:
+            st.error("O Oráculo precisa de um nome para abrir os portões.")
 
-    if 'chat_ora' in st.session_state:
-        for msg in st.session_state['chat_ora']:
-            div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
-            st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
-            st.write("")
+# --- 5. INTERFACE PRINCIPAL (SÓ APARECE APÓS IDENTIFICAÇÃO) ---
+else:
+    st.markdown("<h1 style='text-align: center; margin-bottom: 0px;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
+    
+    # Saudação personalizada conforme o gênero
+    saudacao = "Seja muito bem-vindo" if st.session_state.genero_user == "Masculino" else "Seja muito bem-vinda"
+    st.markdown(f"<p class='saudacao-texto'>{saudacao}, <b>{st.session_state.nome_user}</b>.</p>", unsafe_allow_html=True)
+
+    tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
+
+    # --- ABA 1: ORÁCULO ---
+    with tab1:
+        st.markdown("### Escolha sua Esfera")
+        c1, c2, c3, c4 = st.columns(4)
+        with c1: 
+            if st.button("❤️ AMOR"): st.session_state.setor = "Amor"
+        with c2: 
+            if st.button("💼 TRABALHO"): st.session_state.setor = "Trabalho"
+        with c3: 
+            if st.button("✨ FUTURO"): st.session_state.setor = "Futuro"
+        with c4: 
+            if st.button("🌿 SAÚDE"): st.session_state.setor = "Saúde"
         
-        with st.form(key="form_ora", clear_on_submit=True):
-            resp = st.text_input("Continue a conversa com o Oráculo:")
-            if st.form_submit_button("ENVIAR") and resp:
-                st.session_state['chat_ora'].append({"role": "user", "content": resp})
-                res = consultar_ravengar(f"Ravengar, sobre {setor}: {resp}", "Continue o diálogo místico.", chave_api)
-                st.session_state['chat_ora'].append({"role": "ravengar", "content": res})
-                st.rerun()
-
-# --- ABA 2: DECIFRADOR COM CHAT ---
-with tab2:
-    st.markdown("### 👁️ O Decifrador")
-    texto_dec = st.text_area("Insira o enigma, sonho ou mensagem:", key="dec_input")
-    
-    if st.button("DECIFRAR MISTÉRIO", key="btn_dec"):
-        if chave_api and texto_dec:
-            res = consultar_ravengar("Você é o Ravengar, decifrador de símbolos.", texto_dec, chave_api)
-            st.session_state['chat_dec'] = [{"role": "ravengar", "content": res}]
-
-    if 'chat_dec' in st.session_state:
-        for msg in st.session_state['chat_dec']:
-            div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
-            st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
-            st.write("")
+        setor = st.session_state.get('setor', 'Destino')
+        pergunta_ora = st.text_area(f"O que deseja saber sobre o seu {setor}?", key="ora_input")
         
-        with st.form(key="form_dec", clear_on_submit=True):
-            resp = st.text_input("Pergunte mais sobre este mistério:")
-            if st.form_submit_button("ENVIAR") and resp:
-                st.session_state['chat_dec'].append({"role": "user", "content": resp})
-                res = consultar_ravengar(f"Ravengar, decifrando: {resp}", "Continue a explicação mística.", chave_api)
-                st.session_state['chat_dec'].append({"role": "ravengar", "content": res})
-                st.rerun()
+        if st.button("PROFERIR VEREDITO", key="btn_ora"):
+            if chave_api and pergunta_ora:
+                res = consultar_ravengar(f"Você é o Ravengar. Responda a {st.session_state.nome_user} sobre {setor}.", pergunta_ora, chave_api)
+                st.session_state['chat_ora'] = [{"role": "ravengar", "content": res}]
 
-# --- ABA 3: TESTE DE INTENÇÃO (MANTIDO) ---
-with tab3:
-    st.markdown("### 🔥 Teste de Intenção Real")
-    col_a, col_b = st.columns(2)
-    with col_a: nome_alvo = st.text_input("Nome da pessoa:", key="nome_alvo_int")
-    with col_b: genero_int = st.radio("Essa pessoa é:", ["Homem", "Mulher"], key="gen_int")
-    comportamento = st.text_area("Descreva o comportamento suspeito:", key="comp_input")
-    
-    if st.button("DEVASSAR INTENÇÃO"):
-        if chave_api and comportamento:
-            prompt_init = f"Você é o Ravengar. Analise as intenções de {nome_alvo}. Termine com uma pergunta provocativa."
-            res_inicial = consultar_ravengar(prompt_init, comportamento, chave_api)
-            st.session_state['historico'] = [{"role": "ravengar", "content": res_inicial}]
-    
-    if 'historico' in st.session_state:
-        for msg in st.session_state['historico']:
-            div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
-            st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
-            st.write("")
-        with st.form(key="chat_intencao_rev", clear_on_submit=True):
-            resp_usuario = st.text_input("Sua resposta para o Ravengar:")
-            if st.form_submit_button("ENVIAR RESPOSTA") and resp_usuario:
-                st.session_state['historico'].append({"role": "user", "content": resp_usuario})
-                nova_res = consultar_ravengar(f"Ravengar, contexto: {resp_usuario}", "Continue o diálogo de forma mística.", chave_api)
-                st.session_state['historico'].append({"role": "ravengar", "content": nova_res})
-                st.rerun()
+        if 'chat_ora' in st.session_state:
+            for msg in st.session_state['chat_ora']:
+                div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
+                st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            
+            with st.form(key="form_ora", clear_on_submit=True):
+                resp = st.text_input("Continue o diálogo:")
+                if st.form_submit_button("ENVIAR") and resp:
+                    st.session_state['chat_ora'].append({"role": "user", "content": resp})
+                    res = consultar_ravengar(f"Ravengar, em diálogo com {st.session_state.nome_user} sobre {setor}: {resp}", "Responda de forma mística.", chave_api)
+                    st.session_state['chat_ora'].append({"role": "ravengar", "content": res})
+                    st.rerun()
 
-# --- ABA 4: QUIZ PSICOLÓGICO (MANTIDO) ---
-with tab4:
-    if 'quiz_iniciado' not in st.session_state:
-        st.session_state.quiz_iniciado = False
+    # --- ABA 2: DECIFRADOR ---
+    with tab2:
+        st.markdown("### 👁️ O Decifrador")
+        texto_dec = st.text_area("Descreva o sonho ou sinal para decifrar:", key="dec_input")
+        if st.button("DECIFRAR MISTÉRIO", key="btn_dec"):
+            if chave_api and texto_dec:
+                res = consultar_ravengar(f"Você é o Ravengar decifrador. Falando com {st.session_state.nome_user}.", texto_dec, chave_api)
+                st.session_state['chat_dec'] = [{"role": "ravengar", "content": res}]
 
-    if not st.session_state.quiz_iniciado:
-        st.markdown("### 🧠 Identifique-se")
-        nome_user = st.text_input("Qual é o seu nome?")
-        genero_user = st.radio("Como você se identifica?", ["Masculino", "Feminino"])
-        if st.button("INICIAR JORNADA"):
-            if nome_user:
-                st.session_state.nome_user, st.session_state.genero_user = nome_user, genero_user
-                st.session_state.quiz_iniciado, st.session_state.passo, st.session_state.analise = True, 0, []
-                st.rerun()
-    else:
+        if 'chat_dec' in st.session_state:
+            for msg in st.session_state['chat_dec']:
+                div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
+                st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            
+            with st.form(key="form_dec", clear_on_submit=True):
+                resp = st.text_input("Busque mais profundidade:")
+                if st.form_submit_button("ENVIAR") and resp:
+                    st.session_state['chat_dec'].append({"role": "user", "content": resp})
+                    res = consultar_ravengar(f"Ravengar decifrando para {st.session_state.nome_user}: {resp}", "Continue a explicação.", chave_api)
+                    st.session_state['chat_dec'].append({"role": "ravengar", "content": res})
+                    st.rerun()
+
+    # --- ABA 3: TESTE DE INTENÇÃO ---
+    with tab3:
+        st.markdown("### 🔥 Teste de Intenção Real")
+        col_a, col_b = st.columns(2)
+        with col_a: nome_alvo = st.text_input("Nome da pessoa:", key="nome_alvo_int")
+        with col_b: genero_int = st.radio("Essa pessoa é:", ["Homem", "Mulher"], key="gen_int")
+        comportamento = st.text_area("Descreva o comportamento suspeito dela:", key="comp_input")
+        
+        if st.button("DESVENDAR INTENÇÃO"):
+            if chave_api and comportamento:
+                prompt_init = f"Você é o Ravengar. Analise as intenções de {nome_alvo} para {st.session_state.nome_user}."
+                res_inicial = consultar_ravengar(prompt_init, comportamento, chave_api)
+                st.session_state['historico'] = [{"role": "ravengar", "content": res_inicial}]
+        
+        if 'historico' in st.session_state:
+            for msg in st.session_state['historico']:
+                div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
+                st.markdown(f"<div class='{div_class}'>{'🔮 **Ravengar:**' if msg['role'] == 'ravengar' else '👤 **Você:**'}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            with st.form(key="chat_intencao_rev", clear_on_submit=True):
+                resp_usuario = st.text_input("Sua resposta ao Ravengar:")
+                if st.form_submit_button("ENVIAR") and resp_usuario:
+                    st.session_state['historico'].append({"role": "user", "content": resp_usuario})
+                    nova_res = consultar_ravengar(f"Ravengar, conversando com {st.session_state.nome_user}: {resp_usuario}", "Continue a análise.", chave_api)
+                    st.session_state['historico'].append({"role": "ravengar", "content": nova_res})
+                    st.rerun()
+
+    # --- ABA 4: QUIZ PSICOLÓGICO ---
+    with tab4:
+        if 'passo' not in st.session_state:
+            st.session_state.passo = 0
+            st.session_state.analise = []
+
         g = st.session_state.genero_user
         art, um, guerr, prep, reser, leg = ("o", "um", "guerreiro", "preparado", "reservado", "legítimo") if g == "Masculino" else ("a", "uma", "guerreira", "preparada", "reservada", "legítima")
         
@@ -200,7 +219,7 @@ with tab4:
             st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
             cols = st.columns(len(q['o']))
             for i, opt in enumerate(q['o']):
-                if cols[i].button(opt, key=f"q_fin_rev_{st.session_state.passo}_{i}"):
+                if cols[i].button(opt, key=f"q_final_rev_{st.session_state.passo}_{i}"):
                     st.session_state.analise.append(q['s'][opt])
                     st.session_state.passo += 1
                     st.rerun()
@@ -209,6 +228,7 @@ with tab4:
             st.markdown(f"<h2 style='text-align: center; margin-bottom:20px;'>O Veredito para {st.session_state.nome_user}</h2>", unsafe_allow_html=True)
             st.write(" ".join(st.session_state.analise))
             if st.button("REINICIAR JORNADA"):
-                st.session_state.quiz_iniciado = False
+                st.session_state.passo = 0
+                st.session_state.analise = []
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
