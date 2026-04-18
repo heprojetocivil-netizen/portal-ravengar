@@ -250,7 +250,7 @@ else:
         
         # 1. Escolha de Assunto e Notícias
         st.markdown("### 📰 Radar do Ravengar")
-        tema_escolhido = st.selectbox("Escolha um assunto para curadoria:", ["Trabalho", "Amor", "Mistérios do Mundo"])
+        tema_escolhido = st.selectbox("Escolha um assunto para curadoria:", ["Ciência", "Astronomia", "Saúde & Bem-estar", "Relacionamentos", "Tecnologia", "Games", "Esportes", "Cinema & TV"])
         if st.button("BUSCAR NO ÉTER"):
             if chave_api:
                 noticias = consultar_ravengar(f"Resuma 3 notícias reais e importantes de hoje sobre {tema_escolhido} com o seu tom místico.", chave_api, "Noticias")
