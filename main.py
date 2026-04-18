@@ -9,13 +9,13 @@ st.markdown("""
     header {visibility: hidden;}
     .stApp { background-color: #F7F7F7 !important; }
     
-    /* FONTE RETA E PADRONIZADA (ESTILO PREMIUM) */
+    /* FONTE BASE RETA E PADRONIZADA */
     html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         color: #000000 !important;
     }
 
-    /* Pergunta do Quiz: Grande, Reta e Alinhada à Esquerda */
+    /* Perguntas do Quiz: Grandes e alinhadas à esquerda */
     .quiz-pergunta {
         font-size: 28px !important;
         font-weight: 600 !important;
@@ -24,7 +24,8 @@ st.markdown("""
         line-height: 1.4;
     }
     
-    div.stButton > button {
+    /* Botões Padrão */
+    div.stButton > button, div.stFormSubmitButton > button {
         background-color: #FFD1DC !important;
         color: #000000 !important;
         font-weight: bold !important;
@@ -36,16 +37,27 @@ st.markdown("""
         transition: 0.3s;
     }
     
-    /* CARD DO VEREDITO: RESPOSTA DO RAVENGAR */
+    /* Cards de Resposta Padrão (Oráculo, Decifrador, Teste Intenção) - Letra Menor */
     .ravengar-card {
+        background-color: #FFFFFF !important;
+        border: 2px solid #FFD1DC !important;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
+        line-height: 1.6;
+        font-size: 17px !important; /* Letra reduzida aqui */
+    }
+
+    /* Card de Veredito do Quiz - LETRA GRANDE (Impacto) */
+    .veredito-card {
         background-color: #FFFFFF !important;
         border: 2px solid #FFD1DC !important;
         padding: 30px;
         border-radius: 15px;
         box-shadow: 4px 4px 15px rgba(0,0,0,0.05);
         line-height: 1.8;
-        font-size: 20px !important;
-        font-weight: 400 !important;
+        font-size: 22px !important; /* Letra aumentada só no veredito */
+        font-weight: 500 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -72,7 +84,6 @@ st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsaf
 
 tab1, tab2, tab3, tab4 = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🔥 Teste de Intenção", "🧠 Quiz Psicológico"])
 
-# --- ABA 1: ORÁCULO ---
 with tab1:
     st.markdown("### Selecione a Esfera")
     c1, c2, c3, c4 = st.columns(4)
@@ -84,16 +95,13 @@ with tab1:
         if st.button("⚖️ EMPREGO"): st.session_state.setor = "Emprego"
     with c4: 
         if st.button("🌿 SAÚDE"): st.session_state.setor = "Saúde"
-    
     setor = st.session_state.get('setor', 'Destino')
-    st.write(f"Energia atual: **{setor}**")
     pergunta_ora = st.text_area("O que as sombras devem revelar?", key="ora_input")
     if st.button("PROFERIR VEREDITO"):
         if chave_api:
             res = consultar_ravengar(f"Você é o Ravengar. Responda sobre {setor}.", pergunta_ora, chave_api)
             st.markdown(f"<div class='ravengar-card'>{res}</div>", unsafe_allow_html=True)
 
-# --- ABA 2: DECIFRADOR ---
 with tab2:
     st.markdown("### 👁️ O Decifrador")
     texto_dec = st.text_area("Insira o enigma, sonho ou mensagem:", key="dec_input")
@@ -102,7 +110,6 @@ with tab2:
             res = consultar_ravengar("Você é o Ravengar, decifrador de símbolos.", texto_dec, chave_api)
             st.markdown(f"<div class='ravengar-card'>{res}</div>", unsafe_allow_html=True)
 
-# --- ABA 3: TESTE DE INTENÇÃO ---
 with tab3:
     st.markdown("### 🔥 Teste de Intenção Real")
     col_a, col_b = st.columns(2)
@@ -111,19 +118,27 @@ with tab3:
     comportamento = st.text_area("Descreva o comportamento suspeito:", key="comp_input")
 
     if st.button("DEVASSAR INTENÇÃO"):
-        if not chave_api or not comportamento:
-            st.error("Preencha a chave e o comportamento.")
-        else:
-            prompt_init = f"Você é o Ravengar. Analise as intenções de {nome_alvo}."
+        if chave_api and comportamento:
+            prompt_init = f"Você é o Ravengar. Analise as intenções de {nome_alvo}. Termine com uma pergunta provocativa."
             res_inicial = consultar_ravengar(prompt_init, comportamento, chave_api)
             st.session_state['historico'] = [{"role": "ravengar", "content": res_inicial}]
 
     if 'historico' in st.session_state:
         for msg in st.session_state['historico']:
-            if msg['role'] == "ravengar":
-                st.markdown(f"<div class='ravengar-card'>**Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+            div_class = "ravengar-card" if msg['role'] == "ravengar" else ""
+            prefixo = "🔮 **Ravengar:**" if msg['role'] == "ravengar" else "👤 **Você:**"
+            st.markdown(f"<div class='{div_class}'>{prefixo}<br>{msg['content']}</div>", unsafe_allow_html=True)
+            st.write("")
 
-# --- ABA 4: QUIZ PSICOLÓGICO ---
+        with st.form(key="chat_intencao_rev", clear_on_submit=True):
+            resp_usuario = st.text_input("Sua resposta para o Ravengar:")
+            if st.form_submit_button("ENVIAR RESPOSTA") and resp_usuario:
+                st.session_state['historico'].append({"role": "user", "content": resp_usuario})
+                hist_texto = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state['historico']])
+                nova_res = consultar_ravengar(f"Ravengar, histórico: {hist_texto}", "Continue o diálogo de forma mística.", chave_api)
+                st.session_state['historico'].append({"role": "ravengar", "content": nova_res})
+                st.rerun()
+
 with tab4:
     if 'quiz_iniciado' not in st.session_state:
         st.session_state.quiz_iniciado = False
@@ -134,27 +149,24 @@ with tab4:
         genero_user = st.radio("Como você se identifica?", ["Masculino", "Feminino"])
         if st.button("INICIAR JORNADA"):
             if nome_user:
-                st.session_state.nome_user = nome_user
-                st.session_state.genero_user = genero_user
-                st.session_state.quiz_iniciado = True
-                st.session_state.passo = 0
-                st.session_state.analise = []
+                st.session_state.nome_user, st.session_state.genero_user = nome_user, genero_user
+                st.session_state.quiz_iniciado, st.session_state.passo, st.session_state.analise = True, 0, []
                 st.rerun()
     else:
         g = st.session_state.genero_user
         art, um, guerr, prep, reser = ("o", "um", "guerreiro", "preparado", "reservado") if g == "Masculino" else ("a", "uma", "guerreira", "preparada", "reservada")
-
+        
         perguntas = [
             {"p": f"{st.session_state.nome_user}, você caminha pela floresta... você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Você possui uma essência de independência, alguém que encontra força no próprio silêncio para cruzar qualquer destino.", "Com alguém": "Você valoriza a presença e o suporte, entendendo que a vida ganha mais sentido através do compartilhamento."}},
             {"p": "Você vê um animal na sua frente, qual é esse animal?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente vê desafios como batalhas a serem vencidas, agindo com a postura de quem domina o espaço como {um} legítimo {guerr}.", "Coelho": "Sua natureza busca refúgio na calma e na diplomacia, preferindo rotas onde a paz seja a prioridade.", "Pássaro": "Você detém uma agilidade mental rara, capaz de superar obstáculos com uma leveza que os outros não compreendem."}},
             {"p": "A sua reação ao ver o animal é:", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "Sua inteligência é movida pela cautela estratégica; você sabe que recuar muitas vezes é o segredo da sobrevivência.", "Permanecer": f"Você carrega a firmeza de quem não se deixa abalar, mantendo-se {prep} para encarar o desconhecido."}},
-            {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera sob a lógica da segurança e do planejamento, preferindo saber exatamente para onde o caminho leva.", "Terra": "Seu espírito vibra no imprevisível; você encontra beleza na incerteza e na liberdade de criar seu próprio rastro."}},
-            {"p": "Você segue caminhando e avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": f"Suas ambições são vastas e seu potencial de conquista é imenso; você tem grandes aspirações.", "Pequena": "Sua alma entende que a verdadeira plenitude reside no essencial e na tranquilidade de um refúgio acolhedor."}},
+            {"p": "Você chega em uma estrada. Como ela é:", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera sem riscos e com planejamento, preferindo saber exatamente para onde o caminho leva.", "Terra": "Seu espírito vibra no imprevisível; você encontra beleza na incerteza e na liberdade de criar seu próprio rastro."}},
+            {"p": "Você avista uma casa. Ela é:", "o": ["Grande", "Pequena"], "s": {"Grande": f"Suas ambições são vastas e seu potencial de conquista é imenso; você tem grandes aspirações.", "Pequena": "Sua alma entende que a verdadeira plenitude reside no essencial e na tranquilidade de um refúgio acolhedor."}},
             {"p": "A casa tem cerca?", "o": ["Sim", "Não"], "s": {"Sim": "Você é seletivo com sua privacidade, mantendo um escudo necessário para proteger o que há de mais valioso em seu interior.", "Não": "Você é uma pessoa aberta às trocas e ao fluxo da vida, acreditando na transparência como forma de conexão."}},
-            {"p": "Você entra na casa e avista uma mesa. Ela está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão, sentindo que suas necessidades emocionais estão sendo supridas.", "Vazia": "Você atravessa uma fase de busca e introspecção, talvez sentindo que ainda falta algo para completar seu cenário atual."}},
+            {"p": "A mesa dentro da casa está:", "o": ["Farta", "Vazia"], "s": {"Farta": "Seu momento atual é de preenchimento e conexão, sentindo que suas necessidades emocionais estão sendo supridas.", "Vazia": "Você atravessa uma fase de busca e introspecção, talvez sentindo que ainda falta algo para completar seu cenário atual."}},
             {"p": "Você vê uma xícara no chão. O que faz?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você respeita o passado e os legados, entendendo que cada fragmento do que passou ajuda a construir quem você é.", "Ignora": f"Seu foco é o horizonte à frente; você não se permite ser detid{art} por fardos que já não fazem parte do seu agora."}},
             {"p": "A xícara é de:", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada e cuidadosa, tratando os laços como algo precioso que não pode ser negligenciado.", "Metal": "Para você, a lealdade é inquebrável; seus vínculos são forjados para resistir a qualquer tempestade."}},
-            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla a margem"], "s": {"Mergulha": f"Sua entrega é visceral; você mergulha de cabeça nas emoções e vive as experiências com máxima intensidade.", "Toca a água": "Você domina o equilíbrio entre sentir e agir, mantendo o controle emocional enquanto desbrava o mundo.", "Contempla a margem": f"Sua essência é de um observador silencioso; você é {reser} e prefere entender o terreno e proteger sua energia antes de permitir qualquer envolvimento profundo."}}
+            {"p": "Atrás da casa existe um lago, você:", "o": ["Mergulha", "Toca a água", "Contempla a margem"], "s": {"Mergulha": f"Sua entrega é visceral; você mergulha de cabeça nas emoções e vive as experiências com máxima intensidade.", "Toca a água": "Você domina o equilíbrio entre sentir e agir, mantendo o controle emocional enquanto desbrava o mundo.", "Contempla a margem": f"Sua essência é de um observador silencioso; você é {reser} e prefere entender o terreno e proteger sua energia antes de se envolver."}}
         ]
 
         if st.session_state.passo < len(perguntas):
@@ -162,12 +174,12 @@ with tab4:
             st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
             cols = st.columns(len(q['o']))
             for i, opt in enumerate(q['o']):
-                if cols[i].button(opt, key=f"q_final_rev_{st.session_state.passo}_{i}"):
+                if cols[i].button(opt, key=f"q_fin_rev_{st.session_state.passo}_{i}"):
                     st.session_state.analise.append(q['s'][opt])
                     st.session_state.passo += 1
                     st.rerun()
         else:
-            st.markdown("<div class='ravengar-card'>", unsafe_allow_html=True)
+            st.markdown("<div class='veredito-card'>", unsafe_allow_html=True)
             st.markdown(f"<h2 style='text-align: center; margin-bottom:20px;'>O Veredito para {st.session_state.nome_user}</h2>", unsafe_allow_html=True)
             st.write(" ".join(st.session_state.analise))
             if st.button("REINICIAR JORNADA"):
