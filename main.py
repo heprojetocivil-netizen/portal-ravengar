@@ -145,7 +145,7 @@ else:
         pergunta_ora = st.text_area(f"O que desejas saber sobre o teu {setor_atual}?")
         if st.button("PROFERIR VEREDITO"):
             if chave_api and pergunta_ora:
-                st.session_state['chat_ora'] = [{"content": consultar_ravengar(pergunta_ora, chave_api, setor_atual)}]
+                st.session_state['chat_ora'] = [{"content": consultar_ravengar(pergunta_ora, api_key=chave_api, setor=setor_atual)}]
         if 'chat_ora' in st.session_state:
             for msg in st.session_state['chat_ora']:
                 st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
@@ -154,12 +154,12 @@ else:
         texto_dec = st.text_area("Descreve o símbolo ou sonho:")
         if st.button("DECIFRAR MISTÉRIO"):
             if chave_api and texto_dec:
-                st.session_state['chat_dec'] = [{"content": consultar_ravengar(texto_dec, chave_api, "Decifrador")}]
+                st.session_state['chat_dec'] = [{"content": consultar_ravengar(texto_dec, api_key=chave_api, setor="Decifrador")}]
         if 'chat_dec' in st.session_state:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE VIRTUAL (CONTÍNUO - SEM SALVAMENTOS)
+    with tabs[2]: # DETETIVE VIRTUAL (CONTÍNUO - COM RESET)
         if 'historico_detetive' not in st.session_state:
             st.session_state.historico_detetive = []
 
@@ -172,11 +172,17 @@ else:
                 st.markdown(f"**{role_icon} {msg['role'].capitalize()}:** {msg['content']}")
                 if msg["role"] == "assistant": st.markdown("---")
 
-        if prompt := st.chat_input("Dê um novo detalhe ou faça outra pergunta sobre o alvo..."):
+        if prompt := st.chat_input("Diga alguma coisa..."):
             st.session_state.historico_detetive.append({"role": "user", "content": f"Sobre {nome_alvo}: {prompt}"})
-            resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.historico_detetive)
+            resposta = consultar_ravengar("", api_key=chave_api, setor="Detetive", historico=st.session_state.historico_detetive)
             st.session_state.historico_detetive.append({"role": "assistant", "content": resposta})
             st.rerun()
+        
+        if st.session_state.historico_detetive:
+            st.write("")
+            if st.button("🗑️ RESETAR CONVERSA"):
+                st.session_state.historico_detetive = []
+                st.rerun()
 
     with tabs[3]: # QUIZ COMPLETO
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
@@ -229,7 +235,7 @@ else:
         st.markdown("### 📰 Radar do Ravengar")
         tema = st.selectbox("Escolha um assunto:", ["Ciência", "Astronomia", "Saúde & Bem-estar", "Relacionamentos", "Tecnologia", "Games", "Esportes", "Cinema & TV"])
         if st.button("BUSCAR NO ÉTER"):
-            if chave_api: st.session_state['noticias_dia'] = consultar_ravengar(f"Resuma 3 notícias sobre {tema} com tom místico.", chave_api, "Noticias")
+            if chave_api: st.session_state['noticias_dia'] = consultar_ravengar(f"Resuma 3 notícias sobre {tema} com tom místico.", api_key=chave_api, setor="Noticias")
         if 'noticias_dia' in st.session_state: st.markdown(f"<div class='ravengar-card'>{st.session_state['noticias_dia']}</div>", unsafe_allow_html=True)
         st.markdown("---")
         st.markdown("### 🃏 Tarot do Dia")
@@ -237,7 +243,7 @@ else:
             if chave_api:
                 cartas = ["O Mago", "A Sacerdotisa", "A Imperatriz", "O Imperador", "O Hierofante", "Os Enamorados", "O Carro", "A Justiça", "O Eremita", "A Roda da Fortuna", "A Força", "O Pendurado", "A Morte", "A Temperança", "O Diabo", "A Torre", "A Estrela", "A Lua", "O Sol", "O Julgamento", "O Mundo", "O Louco"]
                 carta = random.choice(cartas)
-                st.session_state['carta_dia'] = (carta, consultar_ravengar(f"Carta '{carta}'. Veredito curto.", chave_api, "Tarot"))
+                st.session_state['carta_dia'] = (carta, consultar_ravengar(f"Carta '{carta}'. Veredito curto.", api_key=chave_api, setor="Tarot"))
         if 'carta_dia' in st.session_state:
             st.markdown(f"<div class='ravengar-card' style='text-align: center;'><h2 style='color: #FF69B4;'>{st.session_state['carta_dia'][0]}</h2><p>{st.session_state['carta_dia'][1]}</p></div>", unsafe_allow_html=True)
 
