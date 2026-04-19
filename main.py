@@ -3,7 +3,7 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (MANTIDO INTACTO COM CORREÇÃO TÉCNICA DE CHAVES) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (MANTIDO INTACTO) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
