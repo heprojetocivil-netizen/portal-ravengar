@@ -213,31 +213,31 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA / CURSOS
+    with tabs[4]: # BIBLIOTECA / E-BOOKS E PDFS
         st.markdown("<h2 style='text-align: center;'>🎓 ACADEMIA DE MISTÉRIOS</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center;'>Cursos gratuitos para expandir sua mente e habilidades.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Materiais exclusivos para download gratuito.</p>", unsafe_allow_html=True)
         
         c_col1, c_col2 = st.columns(2)
         
-        cursos = [
-            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "Técnicas de meditação e equilíbrio energético para o caos diário.", "tag": "Misticismo", "link": "#"},
-            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Aprenda a decifrar microexpressões e intenções ocultas em conversas.", "tag": "Psicologia", "link": "#"},
-            {"id": "c3", "titulo": "💼 Estratégia de Sombras", "desc": "Posicionamento de carreira e influência usando arquétipos de poder.", "tag": "Carreira", "link": "#"},
-            {"id": "c4", "titulo": "🃏 Tarot do Iniciado", "desc": "Guia prático para começar a interpretar as cartas por conta própria.", "tag": "Esoterismo", "link": "#"}
+        materiais = [
+            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "PDF completo com técnicas de meditação e equilíbrio energético.", "tag": "E-BOOK", "link": "#"},
+            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Manual para decifrar microexpressões e intenções em PDF.", "tag": "GUIA", "link": "#"},
+            {"id": "c3", "titulo": "💼 Estratégia de Sombras", "desc": "Checklist de posicionamento e influência usando arquétipos.", "tag": "CHECKLIST", "link": "#"},
+            {"id": "c4", "titulo": "🃏 Tarot do Iniciado", "desc": "Livro digital prático para aprender a interpretar as cartas.", "tag": "LIVRO DIGITAL", "link": "#"}
         ]
         
-        for i, curso in enumerate(cursos):
+        for i, mat in enumerate(materiais):
             col_alvo = c_col1 if i % 2 == 0 else c_col2
             with col_alvo:
                 st.markdown(f"""
                 <div class='biblioteca-card'>
-                    <small style='color: #FF69B4;'><b>{curso['tag']}</b></small>
-                    <h4>{curso['titulo']}</h4>
-                    <p>{curso['desc']}</p>
+                    <small style='color: #FF69B4;'><b>{mat['tag']}</b></small>
+                    <h4>{mat['titulo']}</h4>
+                    <p>{mat['desc']}</p>
                 </div>
                 """, unsafe_allow_html=True)
-                if st.button(f"ACESSAR: {curso['titulo']}", key=curso["id"]):
-                    st.success(f"Inscrição confirmada! [CLIQUE PARA ASSISTIR]({curso['link']})")
+                if st.button(f"BAIXAR PDF: {mat['titulo']}", key=mat["id"]):
+                    st.success(f"Conhecimento liberado! [CLIQUE AQUI PARA BAIXAR O ARQUIVO]({mat['link']})")
 
     with tabs[5]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
