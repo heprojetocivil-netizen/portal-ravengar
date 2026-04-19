@@ -213,7 +213,7 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA / CURSOS (UPGRADE REALIZADO AQUI)
+    with tabs[4]: # BIBLIOTECA / CURSOS
         st.markdown("<h2 style='text-align: center;'>🎓 ACADEMIA DE MISTÉRIOS</h2>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center;'>Cursos gratuitos para expandir sua mente e habilidades.</p>", unsafe_allow_html=True)
         
@@ -265,7 +265,7 @@ else:
                 st.write("*O silêncio ecoa... As sombras aguardam o primeiro registro.*")
             else:
                 for m in reversed(mural_global[-15:]):
-                    st.markdown(f<div class='msg-balao'><small><b>{m['usuario']}</b> • {m['hora']}</small><br>{m['texto']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='msg-balao'><small><b>{m['usuario']}</b> • {m['hora']}</small><br>{m['texto']}</div>", unsafe_allow_html=True)
         with col2:
             st.markdown("### ✍️ Manifestar")
             msg_input = st.text_area("O que deseja dizer às sombras?", placeholder="Escreva sua mensagem...")
