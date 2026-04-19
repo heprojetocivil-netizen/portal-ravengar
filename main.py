@@ -71,7 +71,7 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO E AUXILIARES ---
+# --- 3. LÓGICA DE CONEXÃO ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática.",
@@ -81,7 +81,8 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério.",
         "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com lógica fria e mantém o fio da conversa.",
         "Noticias": "És o Ravengar. Resume notícias de forma mística e ácida.",
-        "Tarot": "És o Ravengar, o mestre das cartas."
+        "Tarot": "És o Ravengar, o mestre das cartas.",
+        "Revelacao": "És o Ravengar. O usuário terminou o teste 'Quem você foi na vida passada'. Com base no perfil dele, faça uma REVELAÇÃO misteriosa e curta. Comece com 'Isso explica muita coisa...' e termine citando que recompensas o aguardam em nosso portal principal."
     }
     
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
@@ -101,15 +102,6 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
         return completion.choices[0].message.content
     except Exception as e:
         return f"Erro na conexão mística: {str(e)}"
-
-def formatar_historico_txt(historico):
-    conteudo = "--- RELATÓRIO DE INVESTIGAÇÃO: TENDA DO RAVENGAR ---\n"
-    conteudo += f"Data: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
-    conteudo += "="*50 + "\n\n"
-    for msg in historico:
-        perfil = "VOCÊ" if msg["role"] == "user" else "RAVENGAR"
-        conteudo += f"{perfil}: {msg['content']}\n\n"
-    return conteudo
 
 # --- 4. IDENTIFICAÇÃO ---
 if 'usuario_identificado' not in st.session_state:
@@ -137,7 +129,7 @@ else:
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>. <small>({len(mural_global)} mensagens no Mural)</small></p>", unsafe_allow_html=True)
 
-    tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta", "🧘 Seu Espaço", "🤝 Encontros"])
+    tabs = st.tabs(["🔮 Oráculo", "📜 Vidas Passadas", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta", "🧘 Seu Espaço", "🤝 Encontros"])
 
     with tabs[0]: # ORÁCULO
         c1, c2, c3, c4 = st.columns(4)
@@ -159,7 +151,55 @@ else:
             for msg in st.session_state['chat_ora']:
                 st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[1]: # DECIFRADOR
+    with tabs[1]: # QUEM VOCÊ FOI NA VIDA PASSADA (NOVO)
+        if 'jogo_vp' not in st.session_state:
+            st.session_state.jogo_vp = {"passo": 0, "pontos": {"A": 0, "B": 0, "C": 0, "D": 0}}
+        
+        vp = st.session_state.jogo_vp
+
+        if vp["passo"] == 0:
+            st.markdown("<div style='text-align: center; padding: 20px;'><h2>Quem você foi na vida passada? 🔮</h2><p>As sombras guardam memórias que sua mente consciente esqueceu. Vamos buscá-las.</p></div>", unsafe_allow_html=True)
+            if st.button("INICIAR REVELAÇÃO"):
+                vp["passo"] = 1; st.rerun()
+        
+        elif vp["passo"] <= 4:
+            perguntas_vp = [
+                {"p": "Qual destes cenários te traz uma sensação estranha de 'já estive aqui'?", "o": {"A": "Uma biblioteca antiga e silenciosa", "B": "Um campo de batalha ao amanhecer", "C": "Um porto movimentado com cheiro de mar", "D": "Um templo isolado no topo da montanha"}},
+                {"p": "Qual objeto você sente que teria mais valor em suas mãos?", "o": {"A": "Um pergaminho com selo de cera", "B": "Uma espada pesada e gasta", "C": "Uma bússola de ouro", "D": "Uma chave de ferro enferrujada"}},
+                {"p": "Como você reagiria ao ver uma injustiça na rua?", "o": {"A": "Observaria e buscaria uma solução lógica", "B": "Interviria fisicamente sem pensar", "C": "Chamaria a atenção de todos ao redor", "D": "Aconselharia as partes com calma"}},
+                {"p": "Qual destes elementos te acalma mais profundamente?", "o": {"A": "O cheiro de terra molhada", "B": "O calor intenso do fogo", "C": "O vento forte no rosto", "D": "A imensidão da água corrente"}}
+            ]
+            q = perguntas_vp[vp["passo"]-1]
+            st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
+            for key, val in q['o'].items():
+                if st.button(val, key=f"vp_{vp['passo']}_{key}"):
+                    vp["pontos"][key] += 1
+                    vp["passo"] += 1
+                    st.rerun()
+        else:
+            vencedor = max(vp["pontos"], key=vp["pontos"].get)
+            perfis = {
+                "A": "Um Escriba ou Guardião de Segredos",
+                "B": "Um Guerreiro de Honra",
+                "C": "Um Viajante ou Mercador dos Mares",
+                "D": "Um Sacerdote ou Mestre de Sabedoria"
+            }
+            perfil_final = perfis[vencedor]
+
+            if 'revelacao_final' not in st.session_state:
+                with st.spinner("Conectando com suas vidas passadas..."):
+                    prompt_revelacao = f"O usuário foi identificado como {perfil_final} em sua vida passada. Faça uma leitura curta e mística explicando como isso moldou sua sorte hoje e termine com o link do Quiz Mais Prêmios."
+                    st.session_state.revelacao_final = consultar_ravengar(prompt_revelacao, chave_api, setor="Revelacao")
+            
+            st.markdown(f"<div class='ravengar-card'><h3>Sua Essência Ancestral: {perfil_final}</h3><p>{st.session_state.revelacao_final}</p></div>", unsafe_allow_html=True)
+            st.link_button("👉 RECLAMAR MINHA SORTE AGORA", "http://www.quizmaispremios.com.br")
+            
+            if st.button("REPETIR RITUAL"):
+                del st.session_state.jogo_vp
+                if 'revelacao_final' in st.session_state: del st.session_state.revelacao_final
+                st.rerun()
+
+    with tabs[2]: # DECIFRADOR
         texto_dec = st.text_area("Descreve o símbolo ou sonho:")
         if st.button("DECIFRAR MISTÉRIO"):
             if chave_api and texto_dec:
@@ -168,7 +208,7 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE VIRTUAL
+    with tabs[3]: # DETETIVE VIRTUAL
         if 'historico_detetive' not in st.session_state:
             st.session_state.historico_detetive = []
 
@@ -188,22 +228,11 @@ else:
             st.rerun()
         
         if st.session_state.historico_detetive:
-            col_b1, col_b2 = st.columns(2)
-            with col_b1:
-                if st.button("🗑️ RESETAR CONVERSA"):
-                    st.session_state.historico_detetive = []
-                    st.rerun()
-            with col_b2:
-                # Geração do arquivo de texto para download
-                relatorio = formatar_historico_txt(st.session_state.historico_detetive)
-                st.download_button(
-                    label="💾 SALVAR EM BLOCO DE NOTAS",
-                    data=relatorio,
-                    file_name=f"investigacao_{nome_alvo}.txt",
-                    mime="text/plain"
-                )
+            if st.button("🗑️ RESETAR CONVERSA"):
+                st.session_state.historico_detetive = []
+                st.rerun()
 
-    with tabs[3]: # QUIZ
+    with tabs[4]: # QUIZ
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
         if not st.session_state.quiz_iniciado:
             st.markdown("<div style='text-align: center; padding: 40px;'><h2>Você acha que se conhece bem? 🤔</h2><h4>Faça o nosso teste e descubra camadas da sua personalidade que você nunca percebeu.</h4></div>", unsafe_allow_html=True)
@@ -236,46 +265,23 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA
+    with tabs[5]: # BIBLIOTECA
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
-        
         cursos = [
-            {
-                "id": "c1", "titulo": "🔮 Leitura Fria: Como Entender Qualquer Pessoa em Segundos",
-                "desc": "Aprenda a interpretar comportamentos, identificar padrões ocultos e compreender o que as pessoas realmente pensam — mesmo quando não dizem nada. Neste curso, você vai descobrir técnicas simples e poderosas para fazer leituras precisas, criar conexões instantâneas e se comunicar com muito mais influência e segurança em qualquer situação."
-            },
-            {
-                "id": "c2", "titulo": "✋ Leitura de Mãos: Descubra o Que Suas Mãos Revelam Sobre Você",
-                "desc": "Aprenda a identificar as principais linhas da mão e interpretar seus significados de forma simples e prática. Neste curso, você vai entender como traços físicos podem revelar padrões de personalidade, emoções e tendências, permitindo fazer leituras rápidas e surpreendentes."
-            },
-            {
-                "id": "c3", "titulo": "🔢 Numerologia do Nome: Descubra Seu Código Oculto",
-                "desc": "Aprenda a transformar letras em números e interpretar o significado oculto por trás do seu nome. Neste curso, você vai descobrir padrões que influenciam sua personalidade, suas decisões e até os caminhos que você tende a seguir na vida."
-            },
-            {
-                "id": "c4", "titulo": "🧠 Leitura Psicológica: Descubra Padrões Ocultos da Sua Mente",
-                "desc": "Aprenda a identificar comportamentos inconscientes, entender suas emoções e reconhecer padrões que influenciam suas decisões. Neste curso, você vai acessar uma nova forma de enxergar a si mesmo e às pessoas ao seu redor com muito mais clareza."
-            },
-            {
-                "id": "c5", "titulo": "❤️ Leitura de Intenção: Descubra o Que as Pessoas Realmente Sentem",
-                "desc": "Aprenda a interpretar sinais sutis, atitudes e comportamentos que revelam o verdadeiro interesse das pessoas. Neste curso, você vai entender como decifrar intenções e agir com mais segurança em relacionamentos e interações sociais."
-            },
-            {
-                "id": "c6", "titulo": "🎯 Simulador de Futuro: Veja Para Onde Suas Decisões Estão Te Levando",
-                "desc": "Aprenda a identificar padrões de comportamento e entender como suas escolhas impactam diretamente seu futuro. Neste curso, você vai visualizar diferentes caminhos possíveis e tomar decisões com mais clareza e estratégia."
-            },
-            {
-                "id": "c7", "titulo": "🎁 Desbloqueio da Sorte: Ative Seu Potencial de Oportunidades",
-                "desc": "Aprenda a desenvolver uma mentalidade estratégica para reconhecer e aproveitar oportunidades que passam despercebidas pela maioria. Neste curso, você vai entender como pequenas mudanças podem gerar grandes resultados."
-            }
+            {"id": "c1", "titulo": "🔮 Leitura Fria: Como Entender Qualquer Pessoa em Segundos", "desc": "Aprenda a interpretar comportamentos, identificar padrões ocultos e compreender o que as pessoas realmente pensam — mesmo quando não dizem nada. Neste curso, você vai descobrir técnicas simples e poderosas para fazer leituras precisas, criar conexões instantâneas e se comunicar com muito mais influência e segurança em qualquer situação."},
+            {"id": "c2", "titulo": "✋ Leitura de Mãos: Descubra o Que Suas Mãos Revelam Sobre Você", "desc": "Aprenda a identificar as principais linhas da mão e interpretar seus significados de forma simples e prática. Neste curso, você vai entender como traços físicos podem revelar padrões de personalidade, emoções e tendências, permitindo fazer leituras rápidas e surpreendentes."},
+            {"id": "c3", "titulo": "🔢 Numerologia do Nome: Descubra Seu Código Oculto", "desc": "Aprenda a transformar letras em números e interpretar o significado oculto por trás do seu nome. Neste curso, você vai descobrir padrões que influenciam sua personalidade, suas decisões e até os caminhos que você tende a seguir na vida."},
+            {"id": "c4", "titulo": "🧠 Leitura Psicológica: Descubra Padrões Ocultos da Sua Mente", "desc": "Aprenda a identificar comportamentos inconscientes, entender suas emoções e reconhecer padrões que influenciam suas decisões. Neste curso, você vai acessar uma nova forma de enxergar a si mesmo e às pessoas ao seu redor com muito mais clareza."},
+            {"id": "c5", "titulo": "❤️ Leitura de Intenção: Descubra o Que as Pessoas Realmente Sentem", "desc": "Aprenda a interpretar sinais sutis, atitudes e comportamentos que revelam o verdadeiro interesse das pessoas. Neste curso, você vai entender como decifrar intenções e agir com mais segurança em relacionamentos e interações sociais."},
+            {"id": "c6", "titulo": "🎯 Simulador de Futuro: Veja Para Onde Suas Decisões Estão Te Levando", "desc": "Aprenda a identificar padrões de comportamento e entender como suas escolhas impactam diretamente seu futuro. Neste curso, você vai visualizar diferentes caminhos possíveis e tomar decisões com mais clareza e estratégia."},
+            {"id": "c7", "titulo": "🎁 Desbloqueio da Sorte: Ative Seu Potencial de Oportunidades", "desc": "Aprenda a desenvolver uma mentalidade estratégica para reconhecer e aproveitar oportunidades que passam despercebidas pela maioria. Neste curso, você vai entender como pequenas mudanças podem gerar grandes resultados."}
         ]
-
         for item in cursos:
             st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
             if st.button("📥 Baixar PDF", key=item["id"]):
                 st.warning(f"**Acesso Liberado:** O material de '{item['titulo']}' está sendo preparado para você.")
 
-    with tabs[5]: # SEU ESPAÇO
+    with tabs[6]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
         st.markdown("### 📰 Radar do Ravengar")
         tema = st.selectbox("Escolha um assunto:", ["Ciência", "Astronomia", "Saúde & Bem-estar", "Relacionamentos", "Tecnologia", "Games", "Esportes", "Cinema & TV"])
@@ -292,7 +298,7 @@ else:
         if 'carta_dia' in st.session_state:
             st.markdown(f"<div class='ravengar-card' style='text-align: center;'><h2 style='color: #FF69B4;'>{st.session_state['carta_dia'][0]}</h2><p>{st.session_state['carta_dia'][1]}</p></div>", unsafe_allow_html=True)
 
-    with tabs[6]: # ENCONTROS
+    with tabs[7]: # ENCONTROS
         st.markdown("<h2 style='text-align: center;'>🤝 ENCONTROS</h2>", unsafe_allow_html=True)
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -307,13 +313,9 @@ else:
             msg_input = st.text_area("O que deseja dizer às sombras?", placeholder="Escreva sua mensagem...")
             if st.button("LANÇAR AO MURAL"):
                 if msg_input:
-                    mural_global.append({
-                        "usuario": st.session_state.nome_user, 
-                        "texto": msg_input, 
-                        "hora": datetime.datetime.now().strftime("%H:%M")
-                    })
+                    mural_global.append({"usuario": st.session_state.nome_user, "texto": msg_input, "hora": datetime.datetime.now().strftime("%H:%M")})
                     st.rerun()
-                    
+                        
     if st.button("🔄 REINICIAR SESSÃO"):
         st.session_state.clear()
         st.rerun()
