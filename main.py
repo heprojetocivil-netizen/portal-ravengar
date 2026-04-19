@@ -3,7 +3,7 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (SEU ORIGINAL INTEGRAL) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (INTEGRAL) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
@@ -42,18 +42,18 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO (ADAPTADA PARA MEMÓRIA) ---
+# --- 3. LÓGICA DE CONEXÃO (COM MEMÓRIA PARA O DETETIVE) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": ("És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática. "
-                 "Falas sobre fios do destino, batimentos de coração e conexões de alma."),
+                 "Falas sobre fios do destino, batimentos de coração e conexões de alma. Teu tom é acolhedor."),
         "Trabalho": ("És o Ravengar, o Estrategista das Sombras. Tua linguagem é direta, fria e focada em poder. "
                     "Falas sobre movimentos de xadrez e colheita de esforços."),
         "Futuro": ("És o Ravengar, o Profeta do Tempo. Tua linguagem é enigmática, vasta e mística. "
                   "Falas sobre constelações e areias do tempo."),
         "Saude": ("És o Ravengar, o Alquimista da Vitalidade. Tua linguagem é serena, focada em equilíbrio."),
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantenha o diálogo.",
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantenha o diálogo de investigação.",
         "Noticias": "És o Ravengar. Resume notícias de forma mística, ácida e inteligente.",
         "Tarot": "És o Ravengar, o mestre das cartas. Interpretas o Tarot de forma curta e impactante."
     }
@@ -72,7 +72,7 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
         completion = client.chat.completions.create(messages=messages, model="llama-3.3-70b-versatile")
         return completion.choices[0].message.content
     except Exception as e:
-        return f"Erro na conexão: {str(e)}"
+        return f"Erro na conexão mística: {str(e)}"
 
 # --- 4. IDENTIFICAÇÃO ---
 if 'usuario_identificado' not in st.session_state:
@@ -91,15 +91,17 @@ if not st.session_state.usuario_identificado:
                 st.session_state.chave_api = chave_input
                 st.session_state.usuario_identificado = True
                 st.rerun()
+            else:
+                st.error("Por favor, informe seu nome e sua chave API.")
 else:
     # --- INTERFACE PRINCIPAL ---
     chave_api = st.session_state.chave_api
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas, <b>{st.session_state.nome_user}</b>.</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>. <small>({len(mural_global)} mensagens no Mural)</small></p>", unsafe_allow_html=True)
 
     tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta", "🧘 Seu Espaço", "🤝 Encontros"])
 
-    with tabs[0]: # ORÁCULO (SEU ORIGINAL)
+    with tabs[0]: # ORÁCULO
         c1, c2, c3, c4 = st.columns(4)
         with c1: 
             if st.button("❤️ AMOR", key="btn_Amor"): st.session_state.setor = "Amor"; st.rerun()
@@ -121,36 +123,48 @@ else:
     with tabs[1]: # DECIFRADOR
         texto_dec = st.text_area("Descreve o símbolo ou sonho:")
         if st.button("DECIFRAR MISTÉRIO"):
-            if texto_dec: st.session_state['res_dec'] = consultar_ravengar(texto_dec, chave_api, "Decifrador")
+            if texto_dec:
+                st.session_state['res_dec'] = consultar_ravengar(texto_dec, chave_api, "Decifrador")
         if 'res_dec' in st.session_state:
             st.markdown(f"<div class='ravengar-card'>👁️ {st.session_state['res_dec']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE (AQUI ENTRA O CHAT CONTÍNUO)
+    with tabs[2]: # DETETIVE (MANTENDO O BOTÃO FÍSICO E MEMÓRIA)
         if 'chat_det_hist' not in st.session_state: st.session_state.chat_det_hist = []
-        for m in st.session_state.chat_det_hist:
-            div_class = "msg-balao" if m["role"] == "user" else "ravengar-card"
-            st.markdown(f"<div class='{div_class}'><b>{'Você' if m['role']=='user' else '🕵️ Ravengar'}:</b><br>{m['content']}</div>", unsafe_allow_html=True)
         
-        input_det = st.chat_input("Continue a investigação...")
-        if input_det:
-            st.session_state.chat_det_hist.append({"role": "user", "content": input_det})
-            resp = consultar_ravengar(input_det, chave_api, "Detetive", st.session_state.chat_det_hist)
-            st.session_state.chat_det_hist.append({"role": "assistant", "content": resp})
-            st.rerun()
+        pergunta_det = st.text_area("Descreva o comportamento ou suspeita para investigação:")
+        if st.button("AVANÇAR INVESTIGAÇÃO"):
+            if pergunta_det:
+                st.session_state.chat_det_hist.append({"role": "user", "content": pergunta_det})
+                res = consultar_ravengar(pergunta_det, chave_api, "Detetive", st.session_state.chat_det_hist)
+                st.session_state.chat_det_hist.append({"role": "assistant", "content": res})
+        
+        if st.session_state.chat_det_hist:
+            for m in reversed(st.session_state.chat_det_hist):
+                if m["role"] == "user":
+                    st.markdown(f"**Você:** {m['content']}")
+                else:
+                    st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório do Ravengar:**<br>{m['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[3]: # QUIZ COMPLETO (RESTAURADO DO SEU ORIGINAL)
+    with tabs[3]: # QUIZ COMPLETO (RESTAURADO)
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
         if not st.session_state.quiz_iniciado:
-            st.markdown("<div style='text-align: center; padding: 40px;'><h2>Você acha que se conhece bem? 🤔</h2></div>", unsafe_allow_html=True)
-            if st.button("CLIQUE PARA INICIAR"):
+            st.markdown("<div style='text-align: center; padding: 40px;'><h2>Você acha que se conhece bem? 🤔</h2><h4>Faça o nosso teste e descubra camadas da sua personalidade.</h4></div>", unsafe_allow_html=True)
+            if st.button("CLIQUE PARA INICIAR JORNADA"):
                 st.session_state.quiz_iniciado = True; st.session_state.passo = 0; st.session_state.analise = []; st.rerun()
         else:
             g = st.session_state.genero_user
             art, um, guerr, reser = ("o", "um", "guerreiro", "reservado") if g == "Masculino" else ("a", "uma", "guerreira", "reservada")
             perguntas = [
-                {"contexto": "Você caminha por uma floresta...", "p": "Você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Independência.", "Com alguém": "Conexão."}},
-                {"contexto": "Um animal surge.", "p": "Que animal é?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"{um} {guerr}.", "Coelho": "Calma.", "Pássaro": "Agilidade."}},
-                # ... (as outras perguntas seguem a mesma lógica do seu original)
+                {"contexto": "Você caminha por uma floresta densa...", "p": "Nesta caminhada, você está:", "o": ["Só", "Com alguém"], "s": {"Só": "Sua essência é de independência.", "Com alguém": "Você valoriza conexões próximas."}},
+                {"contexto": "De repente, um animal surge à sua frente.", "p": "Que animal é este?", "o": ["Lobo", "Coelho", "Pássaro"], "s": {"Lobo": f"Sua mente age como {um} {guerr}.", "Coelho": "Sua natureza busca calma.", "Pássaro": "Sua agilidade mental é rara."}},
+                {"contexto": "O animal encara você fixamente.", "p": "Qual é a sua reação imediata?", "o": ["Recuar", "Permanecer"], "s": {"Recuar": "Sua inteligência é movida pela cautela.", "Permanecer": "Você não teme o desconhecido."}},
+                {"contexto": "A floresta abre-se, revelando uma estrada.", "p": "Como é esta estrada?", "o": ["Asfalto", "Terra"], "s": {"Asfalto": "Você opera com planejamento.", "Terra": "Seu espírito vibra na liberdade."}},
+                {"contexto": "Você avista uma casa solitária.", "p": "Como descreveria esta casa?", "o": ["Grande", "Pequena"], "s": {"Grande": "Suas ambições são vastas.", "Pequena": "Sua alma entende o essencial."}},
+                {"contexto": "Você aproxima-se da entrada.", "p": "A casa possui uma cerca ao redor?", "o": ["Sim", "Não"], "s": {"Sim": f"Você é {reser}, protegendo seu interior.", "Não": "Você acredita na transparência."}},
+                {"contexto": "Você decide entrar. Há uma mesa de jantar na sala.", "p": "Como está esta mesa?", "o": ["Farta", "Vazia"], "s": {"Farta": "Você vive um momento de conexão emocional.", "Vazia": "Você busca algo profundo que ainda não encontrou."}},
+                {"contexto": "Você nota uma xícara caída no chão.", "p": "O que você faz ao vê-la?", "o": ["Recolhe", "Ignora"], "s": {"Recolhe": "Você valoriza o que moldou seu passado.", "Ignora": "Seu foco está no horizonte à frente."}},
+                {"contexto": "Você observa o material da xícara.", "p": "De que material ela é?", "o": ["Porcelana", "Metal"], "s": {"Porcelana": "Sua visão sobre o afeto é refinada.", "Metal": "Sua lealdade é inquebrável."}},
+                {"contexto": "Ao sair, encontra um lago sereno.", "p": "Diante da água, qual sua atitude?", "o": ["Mergulha", "Toca a água", "Contempla"], "s": {"Mergulha": "Você se entrega de corpo e alma nos relacionamentos.", "Toca a água": "Você domina o equilíbrio.", "Contempla": f"Você é {um} observador {reser}."}}
             ]
             if st.session_state.passo < len(perguntas):
                 q = perguntas[st.session_state.passo]
@@ -161,34 +175,45 @@ else:
                     if cols[i].button(opt, key=f"qz_{st.session_state.passo}_{i}"):
                         st.session_state.analise.append(q['s'][opt]); st.session_state.passo += 1; st.rerun()
             else:
-                st.markdown(f"<div class='ravengar-card'><h3>Veredito:</h3>{' '.join(st.session_state.analise)}</div>", unsafe_allow_html=True)
-                if st.button("REINICIAR"): st.session_state.quiz_iniciado = False; st.rerun()
+                st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
+                if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
     with tabs[4]: # BIBLIOTECA (RESTAURADA)
+        st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         biblioteca = [
-            {"id": "f1", "titulo": "❤️ Fragmento I — Amor Oculto", "desc": "Sinais silenciosos...", "botao": "🔓 Aceder"},
-            {"id": "f2", "titulo": "🔥 Ritual II — Desapego", "desc": "Práticas para libertar...", "botao": "🔓 Abrir"}
+            {"id": "f1", "titulo": "❤️ Fragmento I — Amor Oculto", "desc": "Sinais silenciosos de sentimentos que não são ditos.", "botao": "🔓 Aceder", "link": "#"},
+            {"id": "f2", "titulo": "🔥 Ritual II — Desapego", "desc": "Práticas para libertar a mente de conexões passadas.", "botao": "🔓 Abrir", "link": "#"},
+            {"id": "f3", "titulo": "🌙 Fragmento III — Leis do Destino", "desc": "O que as coincidências estão a tentar dizer-lhe.", "botao": "🔓 Ver Destino", "link": "#"},
+            {"id": "f4", "titulo": "🧠 Código IV — A Mente Alheia", "desc": "A arte de ler intenções através do comportamento.", "botao": "🔓 Decifrar", "link": "#"},
+            {"id": "f5", "titulo": "🕯️ Fragmento V — Proteção Energética", "desc": "Blindagem espiritual para o seu templo interior.", "botao": "🔓 Fortalecer", "link": "#"}
         ]
         for item in biblioteca:
             st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
-            if st.button(item["botao"], key=item["id"]): st.warning("Conhecimento Revelado!")
+            if st.button(item["botao"], key=item["id"]): st.warning(f"**Conhecimento Revelado:** [CLIQUE PARA BAIXAR]({item['link']})")
 
-    with tabs[5]: # SEU ESPAÇO (TAROT ORIGINAL)
+    with tabs[5]: # SEU ESPAÇO
+        st.markdown("### 🃏 Tarot do Dia")
         if st.button("PUXAR CARTA DO DIA"):
-            cartas = ["O Mago", "A Sacerdotisa", "A Imperatriz", "O Imperador"] # Lista completa aqui
+            cartas = ["O Mago", "A Sacerdotisa", "A Imperatriz", "O Imperador", "O Hierofante", "Os Enamorados", "O Carro", "A Justiça", "O Eremita", "A Roda da Fortuna", "A Força", "O Pendurado", "A Morte", "A Temperança", "O Diabo", "A Torre", "A Estrela", "A Lua", "O Sol", "O Julgamento", "O Mundo", "O Louco"]
             carta = random.choice(cartas)
-            st.session_state.carta_dia = (carta, consultar_ravengar(f"Carta {carta}", chave_api, "Tarot"))
+            st.session_state['carta_dia'] = (carta, consultar_ravengar(f"Carta '{carta}'. Veredito curto.", chave_api, "Tarot"))
         if 'carta_dia' in st.session_state:
-            st.markdown(f"<div class='ravengar-card'><h2>{st.session_state.carta_dia[0]}</h2>{st.session_state.carta_dia[1]}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='ravengar-card' style='text-align: center;'><h2 style='color: #FF69B4;'>{st.session_state['carta_dia'][0]}</h2><p>{st.session_state['carta_dia'][1]}</p></div>", unsafe_allow_html=True)
 
-    with tabs[6]: # ENCONTROS (MURAL ORIGINAL)
-        for m in reversed(mural_global[-15:]):
-            st.markdown(f"<div class='msg-balao'><b>{m['usuario']}</b>: {m['texto']}</div>", unsafe_allow_html=True)
-        msg_in = st.text_input("Manifestar:")
-        if st.button("LANÇAR"):
-            if msg_in: mural_global.append({"usuario": st.session_state.nome_user, "texto": msg_in, "hora": datetime.datetime.now().strftime("%H:%M")}); st.rerun()
+    with tabs[6]: # ENCONTROS
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.markdown("### 💬 Mural de Almas")
+            for m in reversed(mural_global[-10:]):
+                st.markdown(f"<div class='msg-balao'><small><b>{m['usuario']}</b></small><br>{m['texto']}</div>", unsafe_allow_html=True)
+        with col2:
+            msg_input = st.text_area("O que deseja dizer?")
+            if st.button("LANÇAR AO MURAL"):
+                if msg_input:
+                    mural_global.append({"usuario": st.session_state.nome_user, "texto": msg_input})
+                    st.rerun()
 
-    # --- 6. RODAPÉ ORIGINAL (RESTAURADO 100%) ---
+    # --- 6. RODAPÉ ORIGINAL INTEGRAL ---
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #666; padding: 20px;'>"
@@ -198,3 +223,7 @@ else:
         "</div>", 
         unsafe_allow_html=True
     )
+    
+    if st.button("🔄 REINICIAR SESSÃO"):
+        st.session_state.clear()
+        st.rerun()
