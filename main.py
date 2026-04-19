@@ -162,12 +162,15 @@ else:
             if st.button("INICIAR REVELAÇÃO"):
                 vp["passo"] = 1; st.rerun()
         
-        elif vp["passo"] <= 4:
+        elif vp["passo"] <= 7:
             perguntas_vp = [
                 {"p": "Qual destes cenários te traz uma sensação estranha de 'já estive aqui'?", "o": {"A": "Uma sala de guerra estratégica", "B": "Um palco sob aplausos", "C": "Uma caravana sem destino", "D": "Um observatório solitário"}},
                 {"p": "O que você mais valoriza em uma jornada?", "o": {"A": "O plano bem executado", "B": "O impacto deixado nas pessoas", "C": "A liberdade de mudar a rota", "D": "A compreensão dos sinais ocultos"}},
                 {"p": "Como você lida com um novo grupo de pessoas?", "o": {"E": "Busco unir todos e criar harmonia", "F": "Prefiro ouvir e aprender tudo primeiro", "A": "Analiso quem é quem e as intenções", "B": "Tomo a frente naturalmente"}},
-                {"p": "Qual o seu maior medo?", "o": {"C": "Ficar preso a uma rotina eterna", "D": "Ignorar um detalhe crucial", "E": "Ver o conflito separar as pessoas", "F": "Ficar na superfície do conhecimento"}}
+                {"p": "Qual o seu maior medo?", "o": {"C": "Ficar preso a uma rotina eterna", "D": "Ignorar um detalhe crucial", "E": "Ver o conflito separar as pessoas", "F": "Ficar na superfície do conhecimento"}},
+                {"p": "Ao se deparar com uma injustiça, qual sua reação ancestral?", "o": {"A": "Punição imediata e justa", "E": "Diplomacia para acalmar os ânimos", "B": "Denúncia pública fervorosa", "D": "Observação fria para entender o motivo"}},
+                {"p": "Se pudesse escolher um artefato antigo para carregar hoje:", "o": {"F": "Um pergaminho de sabedoria esquecida", "C": "Um mapa de terras nunca visitadas", "A": "Uma adaga de proteção leal", "B": "Um amuleto que atrai multidões"}},
+                {"p": "Como você prefere terminar o seu dia?", "o": {"D": "Em silêncio, refletindo sobre o que vi", "F": "Estudando algo que me intriga", "E": "Rodeado de quem traz paz", "C": "Planejando o próximo destino"}}
             ]
             q = perguntas_vp[vp["passo"]-1]
             st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
