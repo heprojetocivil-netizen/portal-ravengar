@@ -213,31 +213,31 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # UPGRADE DA BIBLIOTECA (CURSOS)
+    with tabs[4]: # BIBLIOTECA / CURSOS (UPGRADE REALIZADO AQUI)
         st.markdown("<h2 style='text-align: center;'>🎓 ACADEMIA DE MISTÉRIOS</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Cursos gratuitos para expandir sua mente e habilidades.</p>", unsafe_allow_html=True)
         
-        # Estrutura de Cursos em Colunas
-        col_c1, col_c2 = st.columns(2)
+        c_col1, c_col2 = st.columns(2)
         
-        biblioteca = [
-            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "Curso prático de meditação e equilíbrio de energias para o dia a dia.", "tag": "Misticismo", "link": "#"},
-            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Domine a arte de ler microexpressões e intenções ocultas através da lógica.", "tag": "Psicologia", "link": "#"},
-            {"id": "c3", "titulo": "💼 O Estrategista de Sombras", "desc": "Aprenda táticas de negociação e posicionamento de carreira usando arquétipos.", "tag": "Carreira", "link": "#"},
-            {"id": "c4", "titulo": "🃏 Tarot: O Caminho do Iniciado", "desc": "Um guia completo para entender os arcanos maiores e sua jornada pessoal.", "tag": "Esoterismo", "link": "#"}
+        cursos = [
+            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "Técnicas de meditação e equilíbrio energético para o caos diário.", "tag": "Misticismo", "link": "#"},
+            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Aprenda a decifrar microexpressões e intenções ocultas em conversas.", "tag": "Psicologia", "link": "#"},
+            {"id": "c3", "titulo": "💼 Estratégia de Sombras", "desc": "Posicionamento de carreira e influência usando arquétipos de poder.", "tag": "Carreira", "link": "#"},
+            {"id": "c4", "titulo": "🃏 Tarot do Iniciado", "desc": "Guia prático para começar a interpretar as cartas por conta própria.", "tag": "Esoterismo", "link": "#"}
         ]
         
-        for i, item in enumerate(biblioteca):
-            target_col = col_c1 if i % 2 == 0 else col_c2
-            with target_col:
+        for i, curso in enumerate(cursos):
+            col_alvo = c_col1 if i % 2 == 0 else c_col2
+            with col_alvo:
                 st.markdown(f"""
                 <div class='biblioteca-card'>
-                    <span style='background:#FFD1DC; padding:2px 8px; border-radius:5px; font-size:12px; font-weight:bold;'>{item['tag']}</span>
-                    <h4>{item['titulo']}</h4>
-                    <p>{item['desc']}</p>
+                    <small style='color: #FF69B4;'><b>{curso['tag']}</b></small>
+                    <h4>{curso['titulo']}</h4>
+                    <p>{curso['desc']}</p>
                 </div>
                 """, unsafe_allow_html=True)
-                if st.button(f"ACESSAR CURSO GRATUITO", key=item["id"]):
-                    st.success(f"Matrícula confirmada! [CLIQUE AQUI PARA INICIAR AS AULAS]({item['link']})")
+                if st.button(f"ACESSAR: {curso['titulo']}", key=curso["id"]):
+                    st.success(f"Inscrição confirmada! [CLIQUE PARA ASSISTIR]({curso['link']})")
 
     with tabs[5]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
@@ -265,7 +265,7 @@ else:
                 st.write("*O silêncio ecoa... As sombras aguardam o primeiro registro.*")
             else:
                 for m in reversed(mural_global[-15:]):
-                    st.markdown(f"<div class='msg-balao'><small><b>{m['usuario']}</b> • {m['hora']}</small><br>{m['texto']}</div>", unsafe_allow_html=True)
+                    st.markdown(f<div class='msg-balao'><small><b>{m['usuario']}</b> • {m['hora']}</small><br>{m['texto']}</div>", unsafe_allow_html=True)
         with col2:
             st.markdown("### ✍️ Manifestar")
             msg_input = st.text_area("O que deseja dizer às sombras?", placeholder="Escreva sua mensagem...")
