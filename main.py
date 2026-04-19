@@ -72,7 +72,7 @@ def obter_mural_global():
 mural_global = obter_mural_global()
 
 # --- 3. LÓGICA DE CONEXÃO ---
-def consultar_ravengar(pergunta, api_key, setor="Destino"):
+def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": (
             "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática. "
@@ -95,7 +95,7 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
             "Teu tom é curativo e equilibrado."
         ),
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria.",
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantém o diálogo vivo e investigativo.",
         "Noticias": "És o Ravengar. Atuas como um curador de informações. Resume notícias de forma mística, ácida e inteligente.",
         "Tarot": "És o Ravengar, o mestre das cartas. Interpretas o Tarot de forma curta e impactante."
     }
@@ -103,10 +103,18 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
     sistema += f" Nome do consulente: {st.session_state.get('nome_user', 'Visitante')}."
 
+    messages = [{"role": "system", "content": sistema}]
+    
+    # Se houver histórico (para o modo chat do detetive), adiciona às mensagens
+    if historico:
+        messages.extend(historico)
+    else:
+        messages.append({"role": "user", "content": pergunta})
+
     try:
         client = Groq(api_key=api_key)
         completion = client.chat.completions.create(
-           messages=[{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
+           messages=messages,
            model="llama-3.3-70b-versatile",
         )
         return completion.choices[0].message.content
@@ -170,15 +178,37 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE
-        nome_alvo = st.text_input("Quem vamos investigar?")
-        comp = st.text_area("Descreve o comportamento:")
-        if st.button("INICIAR INVESTIGAÇÃO"):
-            if chave_api and comp:
-                st.session_state['chat_det'] = [{"content": consultar_ravengar(f"Investigar {nome_alvo}: {comp}", chave_api, "Detetive")}]
-        if 'chat_det' in st.session_state:
-            for msg in st.session_state['chat_det']:
-                st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+    with tabs[2]: # DETETIVE (CAMPO ALTERADO PARA CHAT CONTÍNUO)
+        st.markdown("### 🕵️ Investigação Contínua")
+        
+        if 'chat_history_det' not in st.session_state:
+            st.session_state.chat_history_det = []
+
+        # Container para as mensagens
+        chat_placeholder = st.container()
+
+        with chat_placeholder:
+            for message in st.session_state.chat_history_det:
+                if message["role"] == "user":
+                    st.markdown(f"<div style='text-align: right; margin-bottom: 10px;'><b>Você:</b> {message['content']}</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown(f"<div class='ravengar-card'>🕵️ **Ravengar:**<br>{message['content']}</div>", unsafe_allow_html=True)
+
+        # Input de chat no final da página
+        if prompt := st.chat_input("Diga algo para o Detetive..."):
+            # Adiciona mensagem do usuário
+            st.session_state.chat_history_det.append({"role": "user", "content": prompt})
+            
+            # Busca resposta
+            resposta = consultar_ravengar(prompt, chave_api, "Detetive", historico=st.session_state.chat_history_det)
+            
+            # Adiciona resposta do Ravengar
+            st.session_state.chat_history_det.append({"role": "assistant", "content": resposta})
+            st.rerun()
+
+        if st.button("LIMPAR INVESTIGAÇÃO"):
+            st.session_state.chat_history_det = []
+            st.rerun()
 
     with tabs[3]: # QUIZ COMPLETO
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
@@ -213,31 +243,31 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA / E-BOOKS E PDFS
+    with tabs[4]: # BIBLIOTECA / CURSOS
         st.markdown("<h2 style='text-align: center;'>🎓 ACADEMIA DE MISTÉRIOS</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center;'>Materiais exclusivos para download gratuito.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Cursos gratuitos para expandir sua mente e habilidades.</p>", unsafe_allow_html=True)
         
         c_col1, c_col2 = st.columns(2)
         
-        materiais = [
-            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "PDF completo com técnicas de meditação e equilíbrio energético.", "tag": "E-BOOK", "link": "#"},
-            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Manual para decifrar microexpressões e intenções em PDF.", "tag": "GUIA", "link": "#"},
-            {"id": "c3", "titulo": "💼 Estratégia de Sombras", "desc": "Checklist de posicionamento e influência usando arquétipos.", "tag": "CHECKLIST", "link": "#"},
-            {"id": "c4", "titulo": "🃏 Tarot do Iniciado", "desc": "Livro digital prático para aprender a interpretar as cartas.", "tag": "LIVRO DIGITAL", "link": "#"}
+        cursos = [
+            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "Técnicas de meditação e equilíbrio energético para o caos diário.", "tag": "Misticismo", "link": "#"},
+            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Aprenda a decifrar microexpressões e intenções ocultas em conversas.", "tag": "Psicologia", "link": "#"},
+            {"id": "c3", "titulo": "💼 Estratégia de Sombras", "desc": "Posicionamento de carreira e influência usando arquétipos de poder.", "tag": "Carreira", "link": "#"},
+            {"id": "c4", "titulo": "🃏 Tarot do Iniciado", "desc": "Guia prático para começar a interpretar as cartas por conta própria.", "tag": "Esoterismo", "link": "#"}
         ]
         
-        for i, mat in enumerate(materiais):
+        for i, curso in enumerate(cursos):
             col_alvo = c_col1 if i % 2 == 0 else c_col2
             with col_alvo:
                 st.markdown(f"""
                 <div class='biblioteca-card'>
-                    <small style='color: #FF69B4;'><b>{mat['tag']}</b></small>
-                    <h4>{mat['titulo']}</h4>
-                    <p>{mat['desc']}</p>
+                    <small style='color: #FF69B4;'><b>{curso['tag']}</b></small>
+                    <h4>{curso['titulo']}</h4>
+                    <p>{curso['desc']}</p>
                 </div>
                 """, unsafe_allow_html=True)
-                if st.button(f"BAIXAR PDF: {mat['titulo']}", key=mat["id"]):
-                    st.success(f"Conhecimento liberado! [CLIQUE AQUI PARA BAIXAR O ARQUIVO]({mat['link']})")
+                if st.button(f"ACESSAR: {curso['titulo']}", key=curso["id"]):
+                    st.success(f"Inscrição confirmada! [CLIQUE PARA ASSISTIR]({curso['link']})")
 
     with tabs[5]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
