@@ -71,7 +71,7 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO ---
+# --- 3. LÓGICA DE CONEXÃO (MODIFICADA PARA SUPORTAR HISTÓRICO) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": (
@@ -95,7 +95,7 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
             "Teu tom é curativo e equilibrado."
         ),
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantém o diálogo vivo e investigativo.",
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantenha o diálogo e ajude a investigar.",
         "Noticias": "És o Ravengar. Atuas como um curador de informações. Resume notícias de forma mística, ácida e inteligente.",
         "Tarot": "És o Ravengar, o mestre das cartas. Interpretas o Tarot de forma curta e impactante."
     }
@@ -103,9 +103,8 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
     sistema += f" Nome do consulente: {st.session_state.get('nome_user', 'Visitante')}."
 
+    # Prepara as mensagens: se houver histórico (chat contínuo), usa ele.
     messages = [{"role": "system", "content": sistema}]
-    
-    # Se houver histórico (para o modo chat do detetive), adiciona às mensagens
     if historico:
         messages.extend(historico)
     else:
@@ -178,36 +177,28 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE (CAMPO ALTERADO PARA CHAT CONTÍNUO)
+    with tabs[2]: # DETETIVE VIRTUAL (MODIFICADO PARA CHAT CONTÍNUO)
         st.markdown("### 🕵️ Investigação Contínua")
-        
         if 'chat_history_det' not in st.session_state:
             st.session_state.chat_history_det = []
 
-        # Container para as mensagens
-        chat_placeholder = st.container()
-
-        with chat_placeholder:
-            for message in st.session_state.chat_history_det:
-                if message["role"] == "user":
-                    st.markdown(f"<div style='text-align: right; margin-bottom: 10px;'><b>Você:</b> {message['content']}</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<div class='ravengar-card'>🕵️ **Ravengar:**<br>{message['content']}</div>", unsafe_allow_html=True)
-
-        # Input de chat no final da página
-        if prompt := st.chat_input("Diga algo para o Detetive..."):
-            # Adiciona mensagem do usuário
-            st.session_state.chat_history_det.append({"role": "user", "content": prompt})
-            
-            # Busca resposta
-            resposta = consultar_ravengar(prompt, chave_api, "Detetive", historico=st.session_state.chat_history_det)
-            
-            # Adiciona resposta do Ravengar
-            st.session_state.chat_history_det.append({"role": "assistant", "content": resposta})
+        if st.button("🗑️ LIMPAR INVESTIGAÇÃO"):
+            st.session_state.chat_history_det = []
             st.rerun()
 
-        if st.button("LIMPAR INVESTIGAÇÃO"):
-            st.session_state.chat_history_det = []
+        # Container para mostrar as mensagens antigas
+        for message in st.session_state.chat_history_det:
+            if message["role"] == "user":
+                st.markdown(f"<div style='text-align: right; margin-bottom: 10px;'><b>Você:</b> {message['content']}</div>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<div class='ravengar-card'>🕵️ **Ravengar:**<br>{message['content']}</div>", unsafe_allow_html=True)
+
+        # Campo de entrada de chat
+        prompt_det = st.chat_input("Diga algo para o Detetive investigar...")
+        if prompt_det:
+            st.session_state.chat_history_det.append({"role": "user", "content": prompt_det})
+            resp = consultar_ravengar(prompt_det, chave_api, "Detetive", historico=st.session_state.chat_history_det)
+            st.session_state.chat_history_det.append({"role": "assistant", "content": resp})
             st.rerun()
 
     with tabs[3]: # QUIZ COMPLETO
@@ -243,31 +234,18 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA / CURSOS
-        st.markdown("<h2 style='text-align: center;'>🎓 ACADEMIA DE MISTÉRIOS</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center;'>Cursos gratuitos para expandir sua mente e habilidades.</p>", unsafe_allow_html=True)
-        
-        c_col1, c_col2 = st.columns(2)
-        
-        cursos = [
-            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "Técnicas de meditação e equilíbrio energético para o caos diário.", "tag": "Misticismo", "link": "#"},
-            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Aprenda a decifrar microexpressões e intenções ocultas em conversas.", "tag": "Psicologia", "link": "#"},
-            {"id": "c3", "titulo": "💼 Estratégia de Sombras", "desc": "Posicionamento de carreira e influência usando arquétipos de poder.", "tag": "Carreira", "link": "#"},
-            {"id": "c4", "titulo": "🃏 Tarot do Iniciado", "desc": "Guia prático para começar a interpretar as cartas por conta própria.", "tag": "Esoterismo", "link": "#"}
+    with tabs[4]: # BIBLIOTECA
+        st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
+        biblioteca = [
+            {"id": "f1", "titulo": "❤️ Fragmento I — Amor Oculto", "desc": "Sinais silenciosos de sentimentos que não são ditos.", "botao": "🔓 Aceder", "link": "#"},
+            {"id": "f2", "titulo": "🔥 Ritual II — Desapego", "desc": "Práticas para libertar a mente de conexões passadas.", "botao": "🔓 Abrir", "link": "#"},
+            {"id": "f3", "titulo": "🌙 Fragmento III — Leis do Destino", "desc": "O que as coincidências estão a tentar dizer-lhe.", "botao": "🔓 Ver Destino", "link": "#"},
+            {"id": "f4", "titulo": "🧠 Código IV — A Mente Alheia", "desc": "A arte de ler intenções através do comportamento.", "botao": "🔓 Decifrar", "link": "#"},
+            {"id": "f5", "titulo": "🕯️ Fragmento V — Proteção Energética", "desc": "Blindagem espiritual para o seu templo interior.", "botao": "🔓 Fortalecer", "link": "#"}
         ]
-        
-        for i, curso in enumerate(cursos):
-            col_alvo = c_col1 if i % 2 == 0 else c_col2
-            with col_alvo:
-                st.markdown(f"""
-                <div class='biblioteca-card'>
-                    <small style='color: #FF69B4;'><b>{curso['tag']}</b></small>
-                    <h4>{curso['titulo']}</h4>
-                    <p>{curso['desc']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button(f"ACESSAR: {curso['titulo']}", key=curso["id"]):
-                    st.success(f"Inscrição confirmada! [CLIQUE PARA ASSISTIR]({curso['link']})")
+        for item in biblioteca:
+            st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
+            if st.button(item["botao"], key=item["id"]): st.warning(f"**Conhecimento Revelado:** [CLIQUE AQUI PARA BAIXAR]({item['link']})")
 
     with tabs[5]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
@@ -312,7 +290,7 @@ else:
         st.session_state.clear()
         st.rerun()
 
-    # --- 6. RODAPÉ ORIGINAL ---
+    # --- RODAPÉ ---
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #666; padding: 20px;'>"
