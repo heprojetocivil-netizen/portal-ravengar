@@ -71,7 +71,7 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO (Aprimorada para Conversa Contínua) ---
+# --- 3. LÓGICA DE CONEXÃO ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática.",
@@ -159,7 +159,7 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE VIRTUAL (CONTÍNUO - COM RESET)
+    with tabs[2]: # DETETIVE VIRTUAL
         if 'historico_detetive' not in st.session_state:
             st.session_state.historico_detetive = []
 
@@ -179,12 +179,11 @@ else:
             st.rerun()
         
         if st.session_state.historico_detetive:
-            st.write("")
             if st.button("🗑️ RESETAR CONVERSA"):
                 st.session_state.historico_detetive = []
                 st.rerun()
 
-    with tabs[3]: # QUIZ COMPLETO
+    with tabs[3]: # QUIZ
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
         if not st.session_state.quiz_iniciado:
             st.markdown("<div style='text-align: center; padding: 40px;'><h2>Você acha que se conhece bem? 🤔</h2><h4>Faça o nosso teste e descubra camadas da sua personalidade que você nunca percebeu.</h4></div>", unsafe_allow_html=True)
@@ -217,18 +216,44 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA
+    with tabs[4]: # BIBLIOTECA (ATUALIZADA)
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
-        biblioteca = [
-            {"id": "f1", "titulo": "❤️ Fragmento I — Amor Oculto", "desc": "Sinais silenciosos de sentimentos que não são ditos.", "botao": "🔓 Aceder", "link": "#"},
-            {"id": "f2", "titulo": "🔥 Ritual II — Desapego", "desc": "Práticas para libertar a mente de conexões passadas.", "botao": "🔓 Abrir", "link": "#"},
-            {"id": "f3", "titulo": "🌙 Fragmento III — Leis do Destino", "desc": "O que as coincidências estão a tentar dizer-lhe.", "botao": "🔓 Ver Destino", "link": "#"},
-            {"id": "f4", "titulo": "🧠 Código IV — A Mente Alheia", "desc": "A arte de ler intenções através do comportamento.", "botao": "🔓 Decifrar", "link": "#"},
-            {"id": "f5", "titulo": "🕯️ Fragmento V — Proteção Energética", "desc": "Blindagem espiritual para o seu templo interior.", "botao": "🔓 Fortalecer", "link": "#"}
+        
+        cursos = [
+            {
+                "id": "c1", "titulo": "🔮 Leitura Fria: Como Entender Qualquer Pessoa em Segundos",
+                "desc": "Aprenda a interpretar comportamentos, identificar padrões ocultos e compreender o que as pessoas realmente pensam — mesmo quando não dizem nada. Neste curso, você vai descobrir técnicas simples e poderosas para fazer leituras precisas, criar conexões instantâneas e se comunicar com muito mais influência e segurança em qualquer situação."
+            },
+            {
+                "id": "c2", "titulo": "✋ Leitura de Mãos: Descubra o Que Suas Mãos Revelam Sobre Você",
+                "desc": "Aprenda a identificar as principais linhas da mão e interpretar seus significados de forma simples e prática. Neste curso, você vai entender como traços físicos podem revelar padrões de personalidade, emoções e tendências, permitindo fazer leituras rápidas e surpreendentes."
+            },
+            {
+                "id": "c3", "titulo": "🔢 Numerologia do Nome: Descubra Seu Código Oculto",
+                "desc": "Aprenda a transformar letras em números e interpretar o significado oculto por trás do seu nome. Neste curso, você vai descobrir padrões que influenciam sua personalidade, suas decisões e até os caminhos que você tende a seguir na vida."
+            },
+            {
+                "id": "c4", "titulo": "🧠 Leitura Psicológica: Descubra Padrões Ocultos da Sua Mente",
+                "desc": "Aprenda a identificar comportamentos inconscientes, entender suas emoções e reconhecer padrões que influenciam suas decisões. Neste curso, você vai acessar uma nova forma de enxergar a si mesmo e às pessoas ao seu redor com muito mais clareza."
+            },
+            {
+                "id": "c5", "titulo": "❤️ Leitura de Intenção: Descubra o Que as Pessoas Realmente Sentem",
+                "desc": "Aprenda a interpretar sinais sutis, atitudes e comportamentos que revelam o verdadeiro interesse das pessoas. Neste curso, você vai entender como decifrar intenções e agir com mais segurança em relacionamentos e interações sociais."
+            },
+            {
+                "id": "c6", "titulo": "🎯 Simulador de Futuro: Veja Para Onde Suas Decisões Estão Te Levando",
+                "desc": "Aprenda a identificar padrões de comportamento e entender como suas escolhas impactam diretamente seu futuro. Neste curso, você vai visualizar diferentes caminhos possíveis e tomar decisões com mais clareza e estratégia."
+            },
+            {
+                "id": "c7", "titulo": "🎁 Desbloqueio da Sorte: Ative Seu Potencial de Oportunidades",
+                "desc": "Aprenda a desenvolver uma mentalidade estratégica para reconhecer e aproveitar oportunidades que passam despercebidas pela maioria. Neste curso, você vai entender como pequenas mudanças podem gerar grandes resultados."
+            }
         ]
-        for item in biblioteca:
+
+        for item in cursos:
             st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
-            if st.button(item["botao"], key=item["id"]): st.warning(f"**Conhecimento Revelado:** [CLIQUE AQUI PARA BAIXAR]({item['link']})")
+            if st.button("📥 Baixar PDF", key=item["id"]):
+                st.warning(f"**Acesso Liberado:** O material de '{item['titulo']}' está sendo preparado para você.")
 
     with tabs[5]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
