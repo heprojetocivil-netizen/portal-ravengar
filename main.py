@@ -3,7 +3,7 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (INTEGRAL) ---
+# --- 1. CONFIGURAÇÃO E ESTILO ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
@@ -71,7 +71,7 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO (ADAPTADA PARA MEMÓRIA NO DETETIVE) ---
+# --- 3. LÓGICA DE CONEXÃO (Ajustada para suportar histórico) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": (
@@ -95,7 +95,7 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
             "Teu tom é curativo e equilibrado."
         ),
         "Decifrador": "És o Ravengar. Traduz símbolos e sonhos com mistério e sabedoria ancestral.",
-        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantenha o diálogo contínuo.",
+        "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com precisão cirúrgica e lógica fria. Mantenha a continuidade da conversa.",
         "Noticias": "És o Ravengar. Atuas como um curador de informações. Resume notícias de forma mística, ácida e inteligente.",
         "Tarot": "És o Ravengar, o mestre das cartas. Interpretas o Tarot de forma curta e impactante."
     }
@@ -103,17 +103,16 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
     sistema += f" Nome do consulente: {st.session_state.get('nome_user', 'Visitante')}."
 
-    # Se for o detetive, enviamos o histórico completo para a IA
-    mensagens = [{"role": "system", "content": sistema}]
+    # Se houver histórico, usamos ele. Se não, criamos a estrutura padrão.
     if historico:
-        mensagens.extend(historico)
+        mensagens_envio = [{"role": "system", "content": sistema}] + historico
     else:
-        mensagens.append({"role": "user", "content": pergunta})
+        mensagens_envio = [{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}]
 
     try:
         client = Groq(api_key=api_key)
         completion = client.chat.completions.create(
-            messages=mensagens,
+            messages=mensagens_envio,
             model="llama-3.3-70b-versatile",
         )
         return completion.choices[0].message.content
@@ -177,33 +176,32 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE (COM MEMÓRIA E BOTÃO)
-        if 'chat_det_hist' not in st.session_state:
-            st.session_state.chat_det_hist = []
+    with tabs[2]: # DETETIVE (Com lógica de continuidade)
+        if 'historico_detetive' not in st.session_state:
+            st.session_state.historico_detetive = []
 
-        nome_alvo = st.text_input("Quem vamos investigar?")
-        comp = st.text_area("Descreve o comportamento ou faça uma pergunta de acompanhamento:")
+        nome_alvo = st.text_input("Quem vamos investigar?", key="nome_invest")
+        comp = st.text_area("Descreve o comportamento ou faça uma pergunta:", key="comp_invest")
         
         if st.button("INICIAR/CONTINUAR INVESTIGAÇÃO"):
             if chave_api and comp:
-                # Adiciona a nova pergunta ao histórico
-                st.session_state.chat_det_hist.append({"role": "user", "content": f"Investigar {nome_alvo}: {comp}"})
-                
-                # Obtém resposta baseada em todo o histórico
-                resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.chat_det_hist)
-                
-                # Salva a resposta do Ravengar no histórico
-                st.session_state.chat_det_hist.append({"role": "assistant", "content": resposta})
+                # Adiciona pergunta ao histórico
+                st.session_state.historico_detetive.append({"role": "user", "content": f"Alvo {nome_alvo}: {comp}"})
+                # Consulta enviando o histórico
+                resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.historico_detetive)
+                # Adiciona resposta ao histórico
+                st.session_state.historico_detetive.append({"role": "assistant", "content": resposta})
                 st.rerun()
-
-        if st.session_state.chat_det_hist:
-            for msg in reversed(st.session_state.chat_det_hist):
-                if msg["role"] == "user":
-                    st.write(f"**Você:** {msg['content']}")
-                else:
+        
+        # Exibe as mensagens em formato de card, mantendo o estilo original
+        if st.session_state.historico_detetive:
+            for msg in reversed(st.session_state.historico_detetive):
+                if msg["role"] == "assistant":
                     st.markdown(f"<div class='ravengar-card'>🕵️ **Relatório:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+                else:
+                    st.write(f"💬 **Sua pista:** {msg['content']}")
 
-    with tabs[3]: # QUIZ COMPLETO (INTEGRAL)
+    with tabs[3]: # QUIZ COMPLETO
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
         if not st.session_state.quiz_iniciado:
             st.markdown("<div style='text-align: center; padding: 40px;'><h2>Você acha que se conhece bem? 🤔</h2><h4>Faça o nosso teste e descubra camadas da sua personalidade que você nunca percebeu.</h4></div>", unsafe_allow_html=True)
@@ -236,7 +234,7 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA (INTEGRAL)
+    with tabs[4]: # BIBLIOTECA
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         biblioteca = [
             {"id": "f1", "titulo": "❤️ Fragmento I — Amor Oculto", "desc": "Sinais silenciosos de sentimentos que não são ditos.", "botao": "🔓 Aceder", "link": "#"},
