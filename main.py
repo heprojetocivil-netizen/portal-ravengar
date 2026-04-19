@@ -113,7 +113,7 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
     except Exception as e:
         return f"Erro na conexão mística: {str(e)}"
 
-# --- 4. IDENTIFICAÇÃO (CHAVE API INCLUÍDA AQUI) ---
+# --- 4. IDENTIFICAÇÃO ---
 if 'usuario_identificado' not in st.session_state:
    st.session_state.usuario_identificado = False
 
@@ -123,7 +123,6 @@ if not st.session_state.usuario_identificado:
     with col_central:
         nome_input = st.text_input("Como as sombras te devem chamar?")
         genero_input = st.radio("O teu género:", ["Masculino", "Feminino"])
-        # A chave agora faz parte da entrada
         chave_input = st.text_input("Sua Chave Groq API:", type="password")
         
         if st.button("ENTRAR NA TENDA"):
@@ -214,18 +213,31 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[4]: # BIBLIOTECA
-        st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
+    with tabs[4]: # UPGRADE DA BIBLIOTECA (CURSOS)
+        st.markdown("<h2 style='text-align: center;'>🎓 ACADEMIA DE MISTÉRIOS</h2>", unsafe_allow_html=True)
+        
+        # Estrutura de Cursos em Colunas
+        col_c1, col_c2 = st.columns(2)
+        
         biblioteca = [
-            {"id": "f1", "titulo": "❤️ Fragmento I — Amor Oculto", "desc": "Sinais silenciosos de sentimentos que não são ditos.", "botao": "🔓 Aceder", "link": "#"},
-            {"id": "f2", "titulo": "🔥 Ritual II — Desapego", "desc": "Práticas para libertar a mente de conexões passadas.", "botao": "🔓 Abrir", "link": "#"},
-            {"id": "f3", "titulo": "🌙 Fragmento III — Leis do Destino", "desc": "O que as coincidências estão a tentar dizer-lhe.", "botao": "🔓 Ver Destino", "link": "#"},
-            {"id": "f4", "titulo": "🧠 Código IV — A Mente Alheia", "desc": "A arte de ler intenções através do comportamento.", "botao": "🔓 Decifrar", "link": "#"},
-            {"id": "f5", "titulo": "🕯️ Fragmento V — Proteção Energética", "desc": "Blindagem espiritual para o seu templo interior.", "botao": "🔓 Fortalecer", "link": "#"}
+            {"id": "c1", "titulo": "🧘 Alquimia da Paz Interior", "desc": "Curso prático de meditação e equilíbrio de energias para o dia a dia.", "tag": "Misticismo", "link": "#"},
+            {"id": "c2", "titulo": "🧠 O Código da Mente Alheia", "desc": "Domine a arte de ler microexpressões e intenções ocultas através da lógica.", "tag": "Psicologia", "link": "#"},
+            {"id": "c3", "titulo": "💼 O Estrategista de Sombras", "desc": "Aprenda táticas de negociação e posicionamento de carreira usando arquétipos.", "tag": "Carreira", "link": "#"},
+            {"id": "c4", "titulo": "🃏 Tarot: O Caminho do Iniciado", "desc": "Um guia completo para entender os arcanos maiores e sua jornada pessoal.", "tag": "Esoterismo", "link": "#"}
         ]
-        for item in biblioteca:
-            st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
-            if st.button(item["botao"], key=item["id"]): st.warning(f"**Conhecimento Revelado:** [CLIQUE AQUI PARA BAIXAR]({item['link']})")
+        
+        for i, item in enumerate(biblioteca):
+            target_col = col_c1 if i % 2 == 0 else col_c2
+            with target_col:
+                st.markdown(f"""
+                <div class='biblioteca-card'>
+                    <span style='background:#FFD1DC; padding:2px 8px; border-radius:5px; font-size:12px; font-weight:bold;'>{item['tag']}</span>
+                    <h4>{item['titulo']}</h4>
+                    <p>{item['desc']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button(f"ACESSAR CURSO GRATUITO", key=item["id"]):
+                    st.success(f"Matrícula confirmada! [CLIQUE AQUI PARA INICIAR AS AULAS]({item['link']})")
 
     with tabs[5]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
