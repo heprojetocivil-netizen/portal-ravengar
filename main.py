@@ -87,7 +87,6 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
     sistema += f" Nome do consulente: {st.session_state.get('nome_user', 'Visitante')}."
 
-    # Se houver histórico (para o Detetive), usamos a lista completa
     if historico:
         mensagens = [{"role": "system", "content": sistema}] + historico
     else:
@@ -160,29 +159,54 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE VIRTUAL (CONTÍNUO)
+    with tabs[2]: # DETETIVE VIRTUAL (MELHORADO)
         if 'historico_detetive' not in st.session_state:
             st.session_state.historico_detetive = []
+        if 'investigacoes_salvas' not in st.session_state:
+            st.session_state.investigacoes_salvas = []
 
         nome_alvo = st.text_input("Quem vamos investigar?", placeholder="Ex: A pessoa misteriosa...")
         
-        # Container para mostrar a conversa
-        chat_container = st.container()
-        with chat_container:
-            for msg in st.session_state.historico_detetive:
-                role_icon = "👤" if msg["role"] == "user" else "🕵️"
-                st.markdown(f"**{role_icon} {msg['role'].capitalize()}:** {msg['content']}")
-                if msg["role"] == "assistant": st.markdown("---")
+        # Botões de Controle da Investigação
+        col_btn1, col_btn2 = st.columns(2)
+        with col_btn1:
+            if st.button("🗑️ RESETAR CONVERSA"):
+                st.session_state.historico_detetive = []
+                st.rerun()
+        with col_btn2:
+            if st.button("💾 SALVAR INVESTIGAÇÃO"):
+                if st.session_state.historico_detetive:
+                    agora = datetime.datetime.now().strftime("%d/%m - %H:%M")
+                    st.session_state.investigacoes_salvas.append({
+                        "titulo": f"Alvo: {nome_alvo} ({agora})",
+                        "chat": list(st.session_state.historico_detetive)
+                    })
+                    st.success("Relatório salvo com sucesso!")
+                else:
+                    st.error("Não há nada para salvar ainda.")
 
-        # CAMPO DE INPUT CONTÍNUO
-        if prompt := st.chat_input("Dê um novo detalhe ou faça outra pergunta sobre o alvo..."):
-            # Salva o que o usuário digitou
-            st.session_state.historico_detetive.append({"role": "user", "content": f"Sobre {nome_alvo}: {prompt}"})
-            
-            # Busca a resposta do Ravengar mantendo o histórico
+        # Exibir Histórico Salvo
+        if st.session_state.investigacoes_salvas:
+            with st.expander("📂 Ver Investigações Anteriores"):
+                for idx, inv in enumerate(st.session_state.investigacoes_salvas):
+                    if st.button(inv["titulo"], key=f"inv_salva_{idx}"):
+                        st.session_state.historico_detetive = inv["chat"]
+                        st.rerun()
+
+        st.markdown("---")
+        
+        # Área de Chat
+        for msg in st.session_state.historico_detetive:
+            role_icon = "👤" if msg["role"] == "user" else "🕵️"
+            if msg["role"] == "user":
+                st.markdown(f"**{role_icon} Você:** {msg['content']}")
+            else:
+                st.markdown(f"<div class='ravengar-card'>🕵️ **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+
+        # O st.chat_input já possui o botão de enviar (ícone de seta) nativo à direita
+        if prompt := st.chat_input("Dê um novo detalhe ou faça outra pergunta..."):
+            st.session_state.historico_detetive.append({"role": "user", "content": prompt})
             resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.historico_detetive)
-            
-            # Salva a resposta
             st.session_state.historico_detetive.append({"role": "assistant", "content": resposta})
             st.rerun()
 
