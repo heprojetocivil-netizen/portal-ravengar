@@ -3,12 +3,15 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (MANTIDO INTACTO) ---
+# --- 1. CONFIGURAÇÃO E ESTILO ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
 st.markdown(f"""
     <style>
     header {{visibility: hidden;}}
+    /* Esconde a barra lateral completamente */
+    [data-testid="stSidebar"] {{display: none;}}
+    
     .stApp {{ background-color: #F7F7F7 !important; }}
     
     html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
@@ -61,14 +64,14 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DO MURAL GLOBAL (UM ESCREVE, TODOS VEEM) ---
+# --- 2. LÓGICA DO MURAL GLOBAL ---
 @st.cache_resource
 def obter_mural_global():
-    return [] # Esta lista fica na memória do servidor, compartilhada por todos os usuários
+    return [] 
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO (PROMPTS COMPLETOS) ---
+# --- 3. LÓGICA DE CONEXÃO ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
     prompts = {
         "Amor": (
@@ -110,29 +113,30 @@ def consultar_ravengar(pergunta, api_key, setor="Destino"):
     except Exception as e:
         return f"Erro na conexão mística: {str(e)}"
 
-# --- 4. BARRA LATERAL ---
-with st.sidebar:
-    st.markdown("### 🍷 Conexão")
-    chave_api = st.text_input("Chave Groq API", type="password")
-    if st.button("🔄 REINICIAR SESSÃO"):
-        st.session_state.clear()
-        st.rerun()
-
-# --- 5. IDENTIFICAÇÃO ---
+# --- 4. IDENTIFICAÇÃO (CHAVE API INCLUÍDA AQUI) ---
 if 'usuario_identificado' not in st.session_state:
    st.session_state.usuario_identificado = False
 
 if not st.session_state.usuario_identificado:
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
-    nome_input = st.text_input("Como as sombras te devem chamar?")
-    genero_input = st.radio("O teu género:", ["Masculino", "Feminino"])
-    if st.button("ENTRAR NA TENDA"):
-        if nome_input:
-           st.session_state.nome_user, st.session_state.genero_user = nome_input, genero_input
-           st.session_state.usuario_identificado = True
-           st.rerun()
+    col_central = st.columns([1, 2, 1])[1]
+    with col_central:
+        nome_input = st.text_input("Como as sombras te devem chamar?")
+        genero_input = st.radio("O teu género:", ["Masculino", "Feminino"])
+        # A chave agora faz parte da entrada
+        chave_input = st.text_input("Sua Chave Groq API:", type="password")
+        
+        if st.button("ENTRAR NA TENDA"):
+            if nome_input and chave_input:
+               st.session_state.nome_user, st.session_state.genero_user = nome_input, genero_input
+               st.session_state.chave_api = chave_input
+               st.session_state.usuario_identificado = True
+               st.rerun()
+            else:
+               st.error("Por favor, informe seu nome e sua chave API.")
 else:
     # --- INTERFACE PRINCIPAL ---
+    chave_api = st.session_state.chave_api
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>. <small>({len(mural_global)} mensagens no Mural)</small></p>", unsafe_allow_html=True)
 
@@ -240,7 +244,7 @@ else:
         if 'carta_dia' in st.session_state:
             st.markdown(f"<div class='ravengar-card' style='text-align: center;'><h2 style='color: #FF69B4;'>{st.session_state['carta_dia'][0]}</h2><p>{st.session_state['carta_dia'][1]}</p></div>", unsafe_allow_html=True)
 
-    with tabs[6]: # ENCONTROS (MURAL COLETIVO COMPARTILHADO)
+    with tabs[6]: # ENCONTROS
         st.markdown("<h2 style='text-align: center;'>🤝 ENCONTROS</h2>", unsafe_allow_html=True)
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -261,8 +265,12 @@ else:
                         "hora": datetime.datetime.now().strftime("%H:%M")
                     })
                     st.rerun()
+                    
+    if st.button("🔄 REINICIAR SESSÃO"):
+        st.session_state.clear()
+        st.rerun()
 
-    # --- 6. RODAPÉ ORIGINAL (MANTIDO INTACTO) ---
+    # --- 6. RODAPÉ ORIGINAL ---
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #666; padding: 20px;'>"
