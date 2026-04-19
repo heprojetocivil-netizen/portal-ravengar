@@ -117,12 +117,12 @@ if not st.session_state.usuario_identificado:
         
         if st.button("ENTRAR NA TENDA"):
             if nome_input and chave_input:
-               st.session_state.nome_user, st.session_state.genero_user = nome_input, genero_input
-               st.session_state.chave_api = chave_input
-               st.session_state.usuario_identificado = True
-               st.rerun()
+                st.session_state.nome_user, st.session_state.genero_user = nome_input, genero_input
+                st.session_state.chave_api = chave_input
+                st.session_state.usuario_identificado = True
+                st.rerun()
             else:
-               st.error("Por favor, informe seu nome e sua chave API.")
+                st.error("Por favor, informe seu nome e sua chave API.")
 else:
     # --- INTERFACE PRINCIPAL ---
     chave_api = st.session_state.chave_api
@@ -149,7 +149,7 @@ else:
                 st.session_state['chat_ora'] = [{"content": consultar_ravengar(pergunta_ora, api_key=chave_api, setor=setor_atual)}]
         if 'chat_ora' in st.session_state:
             for msg in st.session_state['chat_ora']:
-                st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+                st.markdown(f<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
     with tabs[1]: # QUEM VOCÊ FOI NA VIDA PASSADA
         if 'jogo_vp' not in st.session_state:
@@ -228,10 +228,16 @@ else:
             st.session_state.historico_detetive.append({"role": "assistant", "content": resposta})
             st.rerun()
         
-        if st.session_state.historico_detetive:
-            if st.button("🗑️ RESETAR CONVERSA"):
-                st.session_state.historico_detetive = []
-                st.rerun()
+        col_det1, col_det2 = st.columns(2)
+        with col_det1:
+            if st.session_state.historico_detetive:
+                conteudo_bloco = f"INVESTIGAÇÃO: {nome_alvo}\n" + "\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.historico_detetive])
+                st.download_button("💾 SALVAR NO BLOCO DE NOTAS", data=conteudo_bloco, file_name=f"investigacao_{nome_alvo}.txt", mime="text/plain")
+        with col_det2:
+            if st.session_state.historico_detetive:
+                if st.button("🗑️ RESETAR CONVERSA"):
+                    st.session_state.historico_detetive = []
+                    st.rerun()
 
     with tabs[4]: # QUIZ
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
