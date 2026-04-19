@@ -149,7 +149,7 @@ else:
                 st.session_state['chat_ora'] = [{"content": consultar_ravengar(pergunta_ora, api_key=chave_api, setor=setor_atual)}]
         if 'chat_ora' in st.session_state:
             for msg in st.session_state['chat_ora']:
-                st.markdown(f<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
     with tabs[1]: # QUEM VOCÊ FOI NA VIDA PASSADA
         if 'jogo_vp' not in st.session_state:
