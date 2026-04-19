@@ -64,10 +64,9 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DO MURAL GLOBAL (ATUALIZADO) ---
+# --- 2. LÓGICA DO MURAL GLOBAL ---
 @st.cache_resource
 def obter_mural_global():
-    # O cache_resource garante que os dados persistam entre sessões e recarregamentos
     return [] 
 
 mural_global = obter_mural_global()
@@ -83,7 +82,7 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
         "Detetive": "ÉS O RAVENGAR, o Detetive Virtual. Analisa o comportamento com lógica fria e mantém o fio da conversa.",
         "Noticias": "És o Ravengar. Resume notícias de forma mística e ácida.",
         "Tarot": "És o Ravengar, o mestre das cartas.",
-        "Revelacao": "És o Ravengar. O usuário terminou o teste 'Quem você foi na vida passada'. Com base no perfil dele, faça uma REVELAÇÃO misteriosa e curta. Comece com 'Isso explica muita coisa...' e termine citando que recompensas o aguardam em nosso portal principal."
+        "Revelacao": "És o Ravengar. O usuário terminou o teste 'Quem você foi na vida passada'. Com base no perfil dele, faça uma REVELAÇÃO misteriosa e curta. Comece com 'Isso explica muita coisa...' e termine com um conselho ancestral."
     }
     
     sistema = prompts.get(setor, "És o Ravengar, um oráculo místico.")
@@ -152,9 +151,9 @@ else:
             for msg in st.session_state['chat_ora']:
                 st.markdown(f"<div class='ravengar-card'>🔮 **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[1]: # QUEM VOCÊ FOI NA VIDA PASSADA (NOVO)
+    with tabs[1]: # QUEM VOCÊ FOI NA VIDA PASSADA
         if 'jogo_vp' not in st.session_state:
-            st.session_state.jogo_vp = {"passo": 0, "pontos": {"A": 0, "B": 0, "C": 0, "D": 0}}
+            st.session_state.jogo_vp = {"passo": 0, "pontos": {"A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0}}
         
         vp = st.session_state.jogo_vp
 
@@ -165,10 +164,10 @@ else:
         
         elif vp["passo"] <= 4:
             perguntas_vp = [
-                {"p": "Qual destes cenários te traz uma sensação estranha de 'já estive aqui'?", "o": {"A": "Uma biblioteca antiga e silenciosa", "B": "Um campo de batalha ao amanhecer", "C": "Um porto movimentado com cheiro de mar", "D": "Um templo isolado no topo da montanha"}},
-                {"p": "Qual objeto você sente que teria mais valor em suas mãos?", "o": {"A": "Um pergaminho com selo de cera", "B": "Uma espada pesada e gasta", "C": "Uma bússola de ouro", "D": "Uma chave de ferro enferrujada"}},
-                {"p": "Como você reagiria ao ver uma injustiça na rua?", "o": {"A": "Observaria e buscaria uma solução lógica", "B": "Interviria fisicamente sem pensar", "C": "Chamaria a atenção de todos ao redor", "D": "Aconselharia as partes com calma"}},
-                {"p": "Qual destes elementos te acalma mais profundamente?", "o": {"A": "O cheiro de terra molhada", "B": "O calor intenso do fogo", "C": "O vento forte no rosto", "D": "A imensidão da água corrente"}}
+                {"p": "Qual destes cenários te traz uma sensação estranha de 'já estive aqui'?", "o": {"A": "Uma sala de guerra estratégica", "B": "Um palco sob aplausos", "C": "Uma caravana sem destino", "D": "Um observatório solitário"}},
+                {"p": "O que você mais valoriza em uma jornada?", "o": {"A": "O plano bem executado", "B": "O impacto deixado nas pessoas", "C": "A liberdade de mudar a rota", "D": "A compreensão dos sinais ocultos"}},
+                {"p": "Como você lida com um novo grupo de pessoas?", "o": {"E": "Busco unir todos e criar harmonia", "F": "Prefiro ouvir e aprender tudo primeiro", "A": "Analiso quem é quem e as intenções", "B": "Tomo a frente naturalmente"}},
+                {"p": "Qual o seu maior medo?", "o": {"C": "Ficar preso a uma rotina eterna", "D": "Ignorar um detalhe crucial", "E": "Ver o conflito separar as pessoas", "F": "Ficar na superfície do conhecimento"}}
             ]
             q = perguntas_vp[vp["passo"]-1]
             st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
@@ -180,20 +179,21 @@ else:
         else:
             vencedor = max(vp["pontos"], key=vp["pontos"].get)
             perfis = {
-                "A": "Um Escriba ou Guardião de Segredos",
-                "B": "Um Guerreiro de Honra",
-                "C": "Um Viajante ou Mercador dos Mares",
-                "D": "Um Sacerdote ou Mestre de Sabedoria"
+                "A": "🎯 O Estrategista\n“Você foi alguém que pensava à frente… Tomava decisões calculadas e raramente agia por impulso. Sua mente sempre esteve alguns passos à frente dos outros.”",
+                "B": "🔥 O Influente\n“Você foi alguém que impactava pessoas… Sua presença chamava atenção naturalmente, e suas palavras tinham peso. Mesmo sem perceber, você guiava decisões ao seu redor.”",
+                "C": "🌍 O Livre\n“Você foi alguém que não aceitava limites… Sempre buscava novos caminhos, novas experiências e novos começos. A rotina nunca conseguiu te prender.”",
+                "D": "🧠 O Observador\n“Você foi alguém que enxergava além… Percebia detalhes, intenções e sinais que outros ignoravam. Enquanto muitos falavam, você entendia.”",
+                "E": "💬 O Conector\n“Você foi alguém que unia pessoas… Criava laços, resolvia conflitos e aproximava caminhos. Tinha facilidade natural em lidar com diferentes tipos de pessoas.”",
+                "F": "📚 O Buscador\n“Você foi alguém que buscava entender tudo… Nunca se contentava com o superficial e sempre queria ir mais fundo. O conhecimento era parte da sua essência.”"
             }
             perfil_final = perfis[vencedor]
 
             if 'revelacao_final' not in st.session_state:
                 with st.spinner("Conectando com suas vidas passadas..."):
-                    prompt_revelacao = f"O usuário foi identificado como {perfil_final} em sua vida passada. Faça uma leitura curta e mística explicando como isso moldou sua sorte hoje e termine com o link do Quiz Mais Prêmios."
+                    prompt_revelacao = f"O usuário foi identificado com o seguinte perfil de vida passada: {perfil_final}. Faça uma leitura mística e curta sobre como essa essência ancestral influencia o presente dele."
                     st.session_state.revelacao_final = consultar_ravengar(prompt_revelacao, chave_api, setor="Revelacao")
             
-            st.markdown(f"<div class='ravengar-card'><h3>Sua Essência Ancestral: {perfil_final}</h3><p>{st.session_state.revelacao_final}</p></div>", unsafe_allow_html=True)
-            st.link_button("👉 RECLAMAR MINHA SORTE AGORA", "http://www.quizmaispremios.com.br")
+            st.markdown(f"<div class='ravengar-card'><h3>Sua Essência Ancestral</h3><p style='font-size: 1.2em; white-space: pre-wrap;'>{perfil_final}</p><hr><p>{st.session_state.revelacao_final}</p></div>", unsafe_allow_html=True)
             
             if st.button("REPETIR RITUAL"):
                 del st.session_state.jogo_vp
@@ -269,13 +269,13 @@ else:
     with tabs[5]: # BIBLIOTECA
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         cursos = [
-            {"id": "c1", "titulo": "🔮 Leitura Fria: Como Entender Qualquer Pessoa em Segundos", "desc": "Aprenda a interpretar comportamentos, identificar padrões ocultos e compreender o que as pessoas realmente pensam — mesmo quando não dizem nada. Neste curso, você vai descobrir técnicas simples e poderosas para fazer leituras precisas, criar conexões instantâneas e se comunicar com muito mais influência e segurança em qualquer situação."},
-            {"id": "c2", "titulo": "✋ Leitura de Mãos: Descubra o Que Suas Mãos Revelam Sobre Você", "desc": "Aprenda a identificar as principais linhas da mão e interpretar seus significados de forma simples e prática. Neste curso, você vai entender como traços físicos podem revelar padrões de personalidade, emoções e tendências, permitindo fazer leituras rápidas e surpreendentes."},
-            {"id": "c3", "titulo": "🔢 Numerologia do Nome: Descubra Seu Código Oculto", "desc": "Aprenda a transformar letras em números e interpretar o significado oculto por trás do seu nome. Neste curso, você vai descobrir padrões que influenciam sua personalidade, suas decisões e até os caminhos que você tende a seguir na vida."},
-            {"id": "c4", "titulo": "🧠 Leitura Psicológica: Descubra Padrões Ocultos da Sua Mente", "desc": "Aprenda a identificar comportamentos inconscientes, entender suas emoções e reconhecer padrões que influenciam suas decisões. Neste curso, você vai acessar uma nova forma de enxergar a si mesmo e às pessoas ao seu redor com muito mais clareza."},
-            {"id": "c5", "titulo": "❤️ Leitura de Intenção: Descubra o Que as Pessoas Realmente Sentem", "desc": "Aprenda a interpretar sinais sutis, atitudes e comportamentos que revelam o verdadeiro interesse das pessoas. Neste curso, você vai entender como decifrar intenções e agir com mais segurança em relacionamentos e interações sociais."},
-            {"id": "c6", "titulo": "🎯 Simulador de Futuro: Veja Para Onde Suas Decisões Estão Te Levando", "desc": "Aprenda a identificar padrões de comportamento e entender como suas escolhas impactam diretamente seu futuro. Neste curso, você vai visualizar diferentes caminhos possíveis e tomar decisões com mais clareza e estratégia."},
-            {"id": "c7", "titulo": "🎁 Desbloqueio da Sorte: Ative Seu Potencial de Oportunidades", "desc": "Aprenda a desenvolver uma mentalidade estratégica para reconhecer e aproveitar oportunidades que passam despercebidas pela maioria. Neste curso, você vai entender como pequenas mudanças podem gerar grandes resultados."}
+            {"id": "c1", "titulo": "🔮 Leitura Fria: Como Entender Qualquer Pessoa em Segundos", "desc": "Aprenda a interpretar comportamentos, identificar padrões ocultos e compreender o que as pessoas realmente pensam."},
+            {"id": "c2", "titulo": "✋ Leitura de Mãos: Descubra o Que Suas Mãos Revelam Sobre Você", "desc": "Aprenda a identificar as principais linhas da mão e interpretar seus significados de forma simples e prática."},
+            {"id": "c3", "titulo": "🔢 Numerologia do Nome: Descubra Seu Código Oculto", "desc": "Aprenda a transformar letras em números e interpretar o significado oculto por trás do seu nome."},
+            {"id": "c4", "titulo": "🧠 Leitura Psicológica: Descubra Padrões Ocultos da Sua Mente", "desc": "Aprenda a identificar comportamentos inconscientes e reconhecer padrões que influenciam suas decisões."},
+            {"id": "c5", "titulo": "❤️ Leitura de Intenção: Descubra o Que as Pessoas Realmente Sentem", "desc": "Aprenda a interpretar sinais sutis, atitudes e comportamentos que revelam o verdadeiro interesse."},
+            {"id": "c6", "titulo": "🎯 Simulador de Futuro: Veja Para Onde Suas Decisões Estão Te Levando", "desc": "Aprenda a identificar padrões de comportamento e entender como suas escolhas impactam seu futuro."},
+            {"id": "c7", "titulo": "🎁 Desbloqueio da Sorte: Ative Seu Potencial de Oportunidades", "desc": "Aprenda a desenvolver uma mentalidade estratégica para reconhecer e aproveitar oportunidades."}
         ]
         for item in cursos:
             st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
@@ -321,13 +321,12 @@ else:
         st.session_state.clear()
         st.rerun()
 
-    # --- 6. RODAPÉ ORIGINAL ---
+    # --- 6. RODAPÉ ---
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #666; padding: 20px;'>"
-        "Venha se divertir e concorrer a muitos prêmios com a gente.<br>"
-        "<a href='http://www.quizmaispremios.com.br' target='_blank' style='color: #FF69B4; font-weight: bold; text-decoration: none;'>"
-        "www.quizmaispremios.com.br</a>"
+        "Explorando os mistérios da mente e do destino.<br>"
+        "© 2026 Tenda do Ravengar"
         "</div>", 
         unsafe_allow_html=True
     )
