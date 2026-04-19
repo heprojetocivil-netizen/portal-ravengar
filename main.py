@@ -71,7 +71,7 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO ---
+# --- 3. LÓGICA DE CONEXÃO E AUXILIARES ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática.",
@@ -101,6 +101,15 @@ def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
         return completion.choices[0].message.content
     except Exception as e:
         return f"Erro na conexão mística: {str(e)}"
+
+def formatar_historico_txt(historico):
+    conteudo = "--- RELATÓRIO DE INVESTIGAÇÃO: TENDA DO RAVENGAR ---\n"
+    conteudo += f"Data: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
+    conteudo += "="*50 + "\n\n"
+    for msg in historico:
+        perfil = "VOCÊ" if msg["role"] == "user" else "RAVENGAR"
+        conteudo += f"{perfil}: {msg['content']}\n\n"
+    return conteudo
 
 # --- 4. IDENTIFICAÇÃO ---
 if 'usuario_identificado' not in st.session_state:
@@ -179,9 +188,20 @@ else:
             st.rerun()
         
         if st.session_state.historico_detetive:
-            if st.button("🗑️ RESETAR CONVERSA"):
-                st.session_state.historico_detetive = []
-                st.rerun()
+            col_b1, col_b2 = st.columns(2)
+            with col_b1:
+                if st.button("🗑️ RESETAR CONVERSA"):
+                    st.session_state.historico_detetive = []
+                    st.rerun()
+            with col_b2:
+                # Geração do arquivo de texto para download
+                relatorio = formatar_historico_txt(st.session_state.historico_detetive)
+                st.download_button(
+                    label="💾 SALVAR EM BLOCO DE NOTAS",
+                    data=relatorio,
+                    file_name=f"investigacao_{nome_alvo}.txt",
+                    mime="text/plain"
+                )
 
     with tabs[3]: # QUIZ
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
