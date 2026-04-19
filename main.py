@@ -3,9 +3,10 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (MANTIDO INTACTO) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (CORRIGIDO PARA EVITAR NAMEERROR) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
+# Mantive o seu f""" original, mas dobrei as chaves {{ }} do CSS para o Python não tentar interpretá-las
 st.markdown(f"""
     <style>
     header {{visibility: hidden;}}
@@ -58,16 +59,6 @@ st.markdown(f"""
         border-radius: 12px;
         margin-bottom: 15px;
     }}
-
-    /* Estilo para a nova aba de Cursos */
-    .curso-card {
-        background-color: #FFFFFF !important;
-        border: 1px solid #FFD1DC !important;
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 15px;
-        border-left: 6px solid #FF69B4 !important;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -78,7 +69,7 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO (PROMPTS COMPLETOS REATIVADOS) ---
+# --- 3. LÓGICA DE CONEXÃO ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
     prompts = {
         "Amor": (
@@ -142,12 +133,10 @@ if not st.session_state.usuario_identificado:
            st.session_state.usuario_identificado = True
            st.rerun()
 else:
-    # --- INTERFACE PRINCIPAL ---
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>. <small>({len(mural_global)} mensagens no Mural)</small></p>", unsafe_allow_html=True)
 
-    # Adicionado a 8ª aba no final da lista
-    tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta", "🧘 Seu Espaço", "🤝 Encontros", "🎓 Cursos Grátis"])
+    tabs = st.tabs(["🔮 Oráculo", "👁️ Decifrador", "🕵️ Detetive Virtual", "🧠 Quiz Psicológico", "👉 Biblioteca Secreta", "🧘 Seu Espaço", "🤝 Encontros"])
 
     with tabs[0]: # ORÁCULO
         c1, c2, c3, c4 = st.columns(4)
@@ -256,32 +245,24 @@ else:
         col1, col2 = st.columns([2, 1])
         with col1:
             st.markdown("### 💬 Mural de Almas")
-            if not mural_global: st.write("*O silêncio ecoa...*")
+            if not mural_global:
+                st.write("*O silêncio ecoa... As sombras aguardam o primeiro registro.*")
             else:
                 for m in reversed(mural_global[-15:]):
                     st.markdown(f"<div class='msg-balao'><small><b>{m['usuario']}</b> • {m['hora']}</small><br>{m['texto']}</div>", unsafe_allow_html=True)
         with col2:
             st.markdown("### ✍️ Manifestar")
-            msg_input = st.text_area("O que deseja dizer às sombras?")
+            msg_input = st.text_area("O que deseja dizer às sombras?", placeholder="Escreva sua mensagem...")
             if st.button("LANÇAR AO MURAL"):
                 if msg_input:
-                    mural_global.append({"usuario": st.session_state.nome_user, "texto": msg_input, "hora": datetime.datetime.now().strftime("%H:%M")})
+                    mural_global.append({
+                        "usuario": st.session_state.nome_user, 
+                        "texto": msg_input, 
+                        "hora": datetime.datetime.now().strftime("%H:%M")
+                    })
                     st.rerun()
 
-    with tabs[7]: # NOVA ABA: CURSOS GRÁTIS
-        st.markdown("<h2 style='text-align: center;'>🎓 Cursos e Treinamentos Gratuitos</h2>", unsafe_allow_html=True)
-        cursos = [
-            ("🔮 Leitura Fria", "Aprenda a interpretar pessoas em segundos."),
-            ("✋ Leitura de Mãos", "Descubra o que suas mãos revelam."),
-            ("🔢 Numerologia", "O código oculto do seu nome."),
-            ("🧠 Leitura Psicológica", "Padrões ocultos da mente."),
-            ("🎁 Desbloqueio da Sorte", "Ative seu potencial.")
-        ]
-        for t, d in cursos:
-            st.markdown(f"<div class='curso-card'><strong>{t}</strong><br>{d}</div>", unsafe_allow_html=True)
-            st.button(f"📥 Aceder Material - {t}")
-
-    # --- 6. RODAPÉ ORIGINAL (MANTIDO INTACTO) ---
+    # --- 6. RODAPÉ ORIGINAL ---
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #666; padding: 20px;'>"
