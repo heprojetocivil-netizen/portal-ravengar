@@ -9,6 +9,7 @@ st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wid
 st.markdown(f"""
     <style>
     header {{visibility: hidden;}}
+    /* Esconde a barra lateral completamente */
     [data-testid="stSidebar"] {{display: none;}}
     
     .stApp {{ background-color: #F7F7F7 !important; }}
@@ -16,14 +17,6 @@ st.markdown(f"""
     html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         color: #000000 !important;
-    }}
-
-    /* Correção do conflito visual de sobreposição */
-    .stExpander {{
-        margin-top: 25px !important;
-        margin-bottom: 25px !important;
-        border: 1px solid #FFD1DC !important;
-        border-radius: 12px !important;
     }}
 
     .quiz-pergunta {{
@@ -42,7 +35,6 @@ st.markdown(f"""
         width: 100%;
         height: 50px;
         transition: all 0.3s ease;
-        margin-bottom: 8px;
     }}
 
     .ravengar-card {{
@@ -79,7 +71,7 @@ def obter_mural_global():
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO ---
+# --- 3. LÓGICA DE CONEXÃO (Aprimorada para Conversa Contínua) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino", historico=None):
     prompts = {
         "Amor": "És o Ravengar, o Guardião dos Afetos. Tua linguagem é poética, profunda e empática.",
@@ -131,6 +123,7 @@ if not st.session_state.usuario_identificado:
             else:
                st.error("Por favor, informe seu nome e sua chave API.")
 else:
+    # --- INTERFACE PRINCIPAL ---
     chave_api = st.session_state.chave_api
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>. <small>({len(mural_global)} mensagens no Mural)</small></p>", unsafe_allow_html=True)
@@ -166,56 +159,24 @@ else:
             for msg in st.session_state['chat_dec']:
                 st.markdown(f"<div class='ravengar-card'>👁️ {msg['content']}</div>", unsafe_allow_html=True)
 
-    with tabs[2]: # DETETIVE VIRTUAL (CONTÍNUO E ORGANIZADO)
+    with tabs[2]: # DETETIVE VIRTUAL (CONTÍNUO - SEM SALVAMENTOS)
         if 'historico_detetive' not in st.session_state:
             st.session_state.historico_detetive = []
-        if 'investigacoes_salvas' not in st.session_state:
-            st.session_state.investigacoes_salvas = []
 
-        nome_alvo = st.text_input("Quem vamos investigar?", placeholder="Ex: A pessoa misteriosa...", value=st.session_state.get('alvo_atual', ""))
-        st.session_state.alvo_atual = nome_alvo
+        nome_alvo = st.text_input("Quem vamos investigar?", placeholder="Ex: A pessoa misteriosa...")
         
-        # Área de Chat
         chat_container = st.container()
         with chat_container:
             for msg in st.session_state.historico_detetive:
                 role_icon = "👤" if msg["role"] == "user" else "🕵️"
-                if msg["role"] == "assistant":
-                    st.markdown(f"<div class='ravengar-card'>🕵️ **Ravengar:**<br>{msg['content']}</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"**{role_icon} Você:** {msg['content']}")
+                st.markdown(f"**{role_icon} {msg['role'].capitalize()}:** {msg['content']}")
+                if msg["role"] == "assistant": st.markdown("---")
 
-        # Input de Chat
         if prompt := st.chat_input("Dê um novo detalhe ou faça outra pergunta sobre o alvo..."):
             st.session_state.historico_detetive.append({"role": "user", "content": f"Sobre {nome_alvo}: {prompt}"})
             resposta = consultar_ravengar("", chave_api, "Detetive", st.session_state.historico_detetive)
             st.session_state.historico_detetive.append({"role": "assistant", "content": resposta})
             st.rerun()
-
-        st.markdown("---")
-        
-        # Ferramentas de Arquivo (No final para não sobrepor)
-        col_t1, col_t2 = st.columns(2)
-        with col_t1:
-            if st.button("🗑️ LIMPAR CHAT"):
-                st.session_state.historico_detetive = []
-                st.rerun()
-        with col_t2:
-            if st.button("💾 SALVAR NOS ARQUIVOS"):
-                if st.session_state.historico_detetive:
-                    agora = datetime.datetime.now().strftime("%d/%m - %H:%M")
-                    titulo = f"Caso: {nome_alvo if nome_alvo else 'Incógnito'} ({agora})"
-                    st.session_state.investigacoes_salvas.append({"titulo": titulo, "chat": list(st.session_state.historico_detetive)})
-                    st.toast("Relatório arquivado!", icon="📂")
-                else:
-                    st.error("Nada para salvar.")
-
-        if st.session_state.investigacoes_salvas:
-            with st.expander("📂 ARQUIVOS DE INVESTIGAÇÕES (Clique para carregar)"):
-                for idx, inv in enumerate(st.session_state.investigacoes_salvas):
-                    if st.button(f"📄 {inv['titulo']}", key=f"load_inv_{idx}"):
-                        st.session_state.historico_detetive = inv["chat"]
-                        st.rerun()
 
     with tabs[3]: # QUIZ COMPLETO
         if 'quiz_iniciado' not in st.session_state: st.session_state.quiz_iniciado = False
@@ -306,7 +267,7 @@ else:
         st.session_state.clear()
         st.rerun()
 
-    # --- 6. RODAPÉ ---
+    # --- 6. RODAPÉ ORIGINAL ---
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #666; padding: 20px;'>"
