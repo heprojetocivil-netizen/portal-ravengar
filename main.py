@@ -3,10 +3,9 @@ from groq import Groq
 import random
 import datetime
 
-# --- 1. CONFIGURAÇÃO E ESTILO (CORRIGIDO PARA EVITAR NAMEERROR) ---
+# --- 1. CONFIGURAÇÃO E ESTILO (MANTIDO INTACTO COM CORREÇÃO TÉCNICA DE CHAVES) ---
 st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wide")
 
-# Mantive o seu f""" original, mas dobrei as chaves {{ }} do CSS para o Python não tentar interpretá-las
 st.markdown(f"""
     <style>
     header {{visibility: hidden;}}
@@ -62,14 +61,14 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DO MURAL GLOBAL ---
+# --- 2. LÓGICA DO MURAL GLOBAL (UM ESCREVE, TODOS VEEM) ---
 @st.cache_resource
 def obter_mural_global():
-    return [] 
+    return [] # Esta lista fica na memória do servidor, compartilhada por todos os usuários
 
 mural_global = obter_mural_global()
 
-# --- 3. LÓGICA DE CONEXÃO ---
+# --- 3. LÓGICA DE CONEXÃO (PROMPTS COMPLETOS) ---
 def consultar_ravengar(pergunta, api_key, setor="Destino"):
     prompts = {
         "Amor": (
@@ -133,6 +132,7 @@ if not st.session_state.usuario_identificado:
            st.session_state.usuario_identificado = True
            st.rerun()
 else:
+    # --- INTERFACE PRINCIPAL ---
     st.markdown("<h1 style='text-align: center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: center;'>✨ Boas-vindas à Tenda, <b>{st.session_state.nome_user}</b>. <small>({len(mural_global)} mensagens no Mural)</small></p>", unsafe_allow_html=True)
 
@@ -240,7 +240,7 @@ else:
         if 'carta_dia' in st.session_state:
             st.markdown(f"<div class='ravengar-card' style='text-align: center;'><h2 style='color: #FF69B4;'>{st.session_state['carta_dia'][0]}</h2><p>{st.session_state['carta_dia'][1]}</p></div>", unsafe_allow_html=True)
 
-    with tabs[6]: # ENCONTROS
+    with tabs[6]: # ENCONTROS (MURAL COLETIVO COMPARTILHADO)
         st.markdown("<h2 style='text-align: center;'>🤝 ENCONTROS</h2>", unsafe_allow_html=True)
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -262,7 +262,7 @@ else:
                     })
                     st.rerun()
 
-    # --- 6. RODAPÉ ORIGINAL ---
+    # --- 6. RODAPÉ ORIGINAL (MANTIDO INTACTO) ---
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #666; padding: 20px;'>"
