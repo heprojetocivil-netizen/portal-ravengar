@@ -64,9 +64,10 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LÓGICA DO MURAL GLOBAL ---
+# --- 2. LÓGICA DO MURAL GLOBAL (ATUALIZADO) ---
 @st.cache_resource
 def obter_mural_global():
+    # O cache_resource garante que os dados persistam entre sessões e recarregamentos
     return [] 
 
 mural_global = obter_mural_global()
