@@ -170,7 +170,7 @@ else:
                 {"p": "Qual o seu maior medo?", "o": {"C": "Ficar preso a uma rotina eterna", "D": "Ignorar um detalhe crucial", "E": "Ver o conflito separar as pessoas", "F": "Ficar na superfície do conhecimento"}},
                 {"p": "Ao se deparar com uma injustiça, qual sua reação ancestral?", "o": {"A": "Punição imediata e justa", "E": "Diplomacia para acalmar os ânimos", "B": "Denúncia pública fervorosa", "D": "Observação fria para entender o motivo"}},
                 {"p": "Se pudesse escolher um artefato antigo para carregar hoje:", "o": {"F": "Um pergaminho de sabedoria esquecida", "C": "Um mapa de terras nunca visitadas", "A": "Uma adaga de proteção leal", "B": "Um amuleto que atrai multidões"}},
-                {"p": "Como você prefere terminar o seu dia?", "o": {"D": "Em silêncio, refletindo sobre o que vi", "F": "Estudando algo que me intriga", "E": "Rodeado de quem traz paz", "C": "Planejando o próximo destino"}}
+                {"p": "Como você prefere terminar o seu dia?", "o": {"D": "Em silêncio, refletindo sobre o que vi", "F": "Estudando algo que me instruiga", "E": "Rodeado de quem traz paz", "C": "Planejando o próximo destino"}}
             ]
             q = perguntas_vp[vp["passo"]-1]
             st.markdown(f"<div class='quiz-pergunta'>{q['p']}</div>", unsafe_allow_html=True)
@@ -275,21 +275,21 @@ else:
                 st.markdown(f"<div class='ravengar-card'><h3>O Veredito Psicológico de {st.session_state.nome_user}</h3><p>{' '.join(st.session_state.analise)}</p></div>", unsafe_allow_html=True)
                 if st.button("REINICIAR JORNADA"): st.session_state.quiz_iniciado = False; st.rerun()
 
-    with tabs[5]: # BIBLIOTECA
+    with tabs[5]: # BIBLIOTECA - ATUALIZADA COM OS LINKS
         st.markdown("<h2 style='text-align: center;'>🔮 BIBLIOTECA SECRETA</h2>", unsafe_allow_html=True)
         cursos = [
-            {"id": "c1", "titulo": "🔮 Leitura Fria: Como Entender Qualquer Pessoa em Segundos", "desc": "Aprenda a interpretar comportamentos, identificar padrões ocultos e compreender o que as pessoas realmente pensam."},
-            {"id": "c2", "titulo": "✋ Leitura de Mãos: Descubra o Que Suas Mãos Revelam Sobre Você", "desc": "Aprenda a identificar as principais linhas da mão e interpretar seus significados de forma simples e prática."},
-            {"id": "c3", "titulo": "🔢 Numerologia do Nome: Descubra Seu Código Oculto", "desc": "Aprenda a transformar letras em números e interpretar o significado oculto por trás do seu nome."},
-            {"id": "c4", "titulo": "🧠 Leitura Psicológica: Descubra Padrões Ocultos da Sua Mente", "desc": "Aprenda a identificar comportamentos inconscientes e reconhecer padrões que influenciam suas decisões."},
-            {"id": "c5", "titulo": "❤️ Leitura de Intenção: Descubra o Que as Pessoas Realmente Sentem", "desc": "Aprenda a interpretar sinais sutis, atitudes e comportamentos que revelam o verdadeiro interesse."},
-            {"id": "c6", "titulo": "🎯 Simulador de Futuro: Veja Para Onde Suas Decisões Estão Te Levando", "desc": "Aprenda a identificar padrões de comportamento e entender como suas escolhas impactam seu futuro."},
-            {"id": "c7", "titulo": "🎁 Desbloqueio da Sorte: Ative Seu Potencial de Oportunidades", "desc": "Aprenda a desenvolver uma mentalidade estratégica para reconhecer e aproveitar oportunidades."}
+            {"id": "c1", "titulo": "🔮 Leitura Fria: Como Entender Qualquer Pessoa em Segundos", "desc": "Aprenda a interpretar comportamentos, identificar padrões ocultos e compreender o que as pessoas realmente pensam.", "url": "https://drive.google.com/file/d/1Yn7BkHCKjJPEXb3Rtip11ZxO0R11a1bd/view?usp=sharing"},
+            {"id": "c2", "titulo": "✋ Leitura de Mãos: Descubra o Que Suas Mãos Revelam Sobre Você", "desc": "Aprenda a identificar as principais linhas da mão e interpretar seus significados de forma simples e prática.", "url": "https://drive.google.com/file/d/1jDHSLRzxB2jQbTnpsdegLvMITqLKhHN5/view?usp=sharing"},
+            {"id": "c3", "titulo": "🔢 Numerologia do Nome: Descubra Seu Código Oculto", "desc": "Aprenda a transformar letras em números e interpretar o significado oculto por trás do seu nome.", "url": "https://drive.google.com/file/d/1t0x1eEvlXQbEOO24OZghlAC4x8yLbvzh/view?usp=sharing"},
+            {"id": "c4", "titulo": "🧠 Leitura Psicológica: Descubra Padrões Ocultos da Sua Mente", "desc": "Aprenda a identificar comportamentos inconscientes e reconhecer padrões que influenciam suas decisões.", "url": "https://drive.google.com/file/d/1xcQdzSXBfXIUht2hjGlty0Ikw4nYz4og/view?usp=sharing"},
+            {"id": "c5", "titulo": "❤️ Leitura de Intenção: Descubra o Que as Pessoas Realmente Sentem", "desc": "Aprenda a interpretar sinais sutis, atitudes e comportamentos que revelam o verdadeiro interesse.", "url": "https://drive.google.com/file/d/1XnnG0yXlzPa7f7TVrC8oK5kJZr5_gItJ/view?usp=sharing"},
+            {"id": "c6", "titulo": "🎯 Simulador de Futuro: Veja Para Onde Suas Decisões Estão Te Levando", "desc": "Aprenda a identificar padrões de comportamento e entender como suas escolhas impactam seu futuro.", "url": "https://drive.google.com/file/d/1i8CGaZ0aYba7aykQ8n4nIj52HmS8uqOB/view?usp=sharing"},
+            {"id": "c7", "titulo": "🎁 Desbloqueio da Sorte: Ative Seu Potencial de Oportunidades", "desc": "Aprenda a desenvolver uma mentalidade estratégica para reconhecer e aproveitar oportunidades.", "url": "https://drive.google.com/file/d/1jBUp4W1K-PYCkSeAJuRzm6xaDB8C8Ly1/view?usp=sharing"}
         ]
         for item in cursos:
             st.markdown(f"<div class='biblioteca-card'><h4>{item['titulo']}</h4><p>{item['desc']}</p></div>", unsafe_allow_html=True)
-            if st.button("📥 Baixar PDF", key=item["id"]):
-                st.warning(f"**Acesso Liberado:** O material de '{item['titulo']}' está sendo preparado para você.")
+            st.link_button(f"📥 Baixar PDF", item["url"])
+            st.markdown("<br>", unsafe_allow_html=True)
 
     with tabs[6]: # SEU ESPAÇO
         st.markdown("<h2 style='text-align: center;'>🧘 SEU ESPAÇO</h2>", unsafe_allow_html=True)
