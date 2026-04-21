@@ -12,7 +12,7 @@ st.markdown(f"""
     /* Esconde a barra lateral completamente */
     [data-testid="stSidebar"] {{display: none;}}
     
-    .stApp {{ background-color: #F7F7F7 !important; }}
+    .stApp {{ background-color: #F7F7F7 !important; padding-bottom: 80px; }}
     
     html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, label, div {{
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
@@ -61,7 +61,42 @@ st.markdown(f"""
         border-radius: 12px;
         margin-bottom: 15px;
     }}
+
+    .tool-link {
+        display: inline-block;
+        background: #000000;
+        color: #FFFFFF !important;
+        padding: 5px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 11px;
+        margin-bottom: 10px;
+    }
+
+    /* RODAPÉ FIXO ESTILO NEXUS */
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #00BFFF;
+        color: #000000;
+        text-align: center;
+        padding: 15px;
+        font-weight: bold;
+        z-index: 1000;
+        border-top: 2px solid #0080FF;
+    }
     </style>
+    """, unsafe_allow_html=True)
+
+# --- RODAPÉ IMPLEMENTADO ---
+st.markdown("""
+    <div class="footer">
+        Acesse <a href="http://www.quizmaispremios.com.br" style="color: #000; text-decoration: underline;">www.quizmaispremios.com.br</a> 
+        e venha se divertir com a gente e ganhar muitos prêmios!
+    </div>
     """, unsafe_allow_html=True)
 
 # --- 2. LÓGICA DO MURAL GLOBAL ---
@@ -113,6 +148,9 @@ if not st.session_state.usuario_identificado:
     with col_central:
         nome_input = st.text_input("Como as sombras te devem chamar?")
         genero_input = st.radio("O teu género:", ["Masculino", "Feminino"])
+        
+        # Link e Chave API
+        st.markdown("<a href='https://console.groq.com/keys' target='_blank' class='tool-link'>Obter chave Groq grátis</a>", unsafe_allow_html=True)
         chave_input = st.text_input("Sua Chave Groq API:", type="password")
         
         if st.button("ENTRAR NA TENDA"):
@@ -329,13 +367,3 @@ else:
     if st.button("🔄 REINICIAR SESSÃO"):
         st.session_state.clear()
         st.rerun()
-
-    # --- 6. RODAPÉ ---
-    st.markdown("---")
-    st.markdown(
-        "<div style='text-align: center; color: #666; padding: 20px;'>"
-        "Explorando os mistérios da mente e do destino.<br>"
-        "© 2026 Tenda do Ravengar"
-        "</div>", 
-        unsafe_allow_html=True
-    )
