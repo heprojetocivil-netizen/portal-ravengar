@@ -161,13 +161,47 @@ st.markdown("""
         background-color: transparent !important;
     }
 
+    /* INPUTS - força fundo escuro em todos os campos */
+    input, textarea, select,
+    .stTextInput input,
+    .stTextArea textarea,
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea,
-    .stSelectbox > div > div {
-        background-color: rgba(255,255,255,0.05) !important;
-        border: 1px solid rgba(212,175,55,0.3) !important;
-        color: var(--branco) !important;
+    .stSelectbox > div > div,
+    [data-baseweb="base-input"],
+    [data-baseweb="base-input"] input,
+    [data-baseweb="base-input"] textarea,
+    [data-baseweb="textarea"] textarea,
+    [data-baseweb="input"] input,
+    [class*="st-"] input,
+    [class*="st-"] textarea {
+        background-color: rgba(26, 10, 46, 0.95) !important;
+        border: 1px solid rgba(212,175,55,0.4) !important;
+        color: #F8F4FF !important;
         border-radius: 10px !important;
+        caret-color: #D4AF37 !important;
+    }
+
+    /* Placeholder */
+    input::placeholder, textarea::placeholder {
+        color: rgba(196, 181, 212, 0.5) !important;
+    }
+
+    /* Wrapper dos inputs */
+    [data-baseweb="base-input"],
+    [data-baseweb="textarea"],
+    [data-baseweb="input"] {
+        background-color: rgba(26, 10, 46, 0.95) !important;
+        border-color: rgba(212,175,55,0.4) !important;
+    }
+
+    /* Chat input area */
+    [data-testid="stChatInput"],
+    [data-testid="stChatInput"] > div,
+    [data-testid="stChatInput"] textarea {
+        background-color: rgba(26, 10, 46, 0.95) !important;
+        color: #F8F4FF !important;
+        border-color: rgba(212,175,55,0.4) !important;
     }
 
     .stButton > button {
