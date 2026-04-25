@@ -46,6 +46,121 @@ st.markdown("""
         font-family: 'Raleway', sans-serif !important;
     }
 
+    /* Corrige elementos internos do Streamlit que ficam brancos */
+    [data-testid="stExpander"],
+    [data-testid="stExpanderDetails"],
+    .stAlert,
+    .stInfo,
+    [data-testid="stNotification"],
+    [data-baseweb="notification"],
+    [data-baseweb="toast"],
+    [data-testid="element-container"],
+    .element-container,
+    [data-testid="stVerticalBlock"],
+    [data-testid="stHorizontalBlock"],
+    section[data-testid="stSidebar"],
+    [data-testid="stForm"],
+    .stForm,
+    div[class*="block-container"],
+    div[class*="stColumn"],
+    [data-testid="column"] {
+        background-color: transparent !important;
+    }
+
+    /* Força texto visível em qualquer fundo claro gerado pelo Streamlit */
+    [data-baseweb="select"] *,
+    [data-baseweb="input"] *,
+    [data-baseweb="textarea"] *,
+    [data-baseweb="popover"] *,
+    [data-baseweb="menu"] *,
+    [role="listbox"] *,
+    [role="option"] {
+        color: #1A0A2E !important;
+        background-color: #F8F4FF !important;
+    }
+
+    /* Dropdown e opções do selectbox */
+    [data-baseweb="popover"],
+    [data-baseweb="menu"],
+    ul[role="listbox"] {
+        background-color: #1A0A2E !important;
+    }
+    [data-baseweb="menu"] li,
+    [role="option"] {
+        color: var(--branco) !important;
+        background-color: #1A0A2E !important;
+    }
+    [data-baseweb="menu"] li:hover,
+    [role="option"]:hover {
+        background-color: #6B21A8 !important;
+    }
+
+    /* Radio buttons */
+    [data-testid="stRadio"] label,
+    [data-testid="stRadio"] div,
+    [data-testid="stRadio"] p,
+    [data-testid="stCheckbox"] label,
+    [data-testid="stCheckbox"] p {
+        color: var(--branco) !important;
+    }
+
+    /* Métricas */
+    [data-testid="stMetric"] label,
+    [data-testid="stMetric"] div {
+        color: var(--cinza) !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: var(--ouro) !important;
+    }
+
+    /* Date input */
+    input[type="date"],
+    [data-baseweb="datepicker"] input {
+        color: var(--branco) !important;
+        background-color: rgba(255,255,255,0.05) !important;
+    }
+
+    /* Number input */
+    input[type="number"] {
+        color: var(--branco) !important;
+        background-color: rgba(255,255,255,0.05) !important;
+    }
+
+    /* Spinner texto */
+    [data-testid="stSpinner"] p {
+        color: var(--ouro) !important;
+    }
+
+    /* Chat input */
+    [data-testid="stChatInput"] textarea {
+        background-color: rgba(255,255,255,0.05) !important;
+        color: var(--branco) !important;
+        border: 1px solid rgba(212,175,55,0.3) !important;
+    }
+
+    /* Download button */
+    [data-testid="stDownloadButton"] button {
+        background: linear-gradient(135deg, #1A0A2E, #0F0520) !important;
+        color: var(--ouro) !important;
+        border: 1px solid var(--ouro) !important;
+    }
+
+    /* Link button */
+    [data-testid="stLinkButton"] a {
+        background: linear-gradient(135deg, var(--roxo), #4C1D95) !important;
+        color: var(--ouro-claro) !important;
+        border: 1px solid var(--ouro) !important;
+        border-radius: 10px !important;
+        padding: 8px 16px !important;
+        font-family: 'Cinzel', serif !important;
+        text-decoration: none !important;
+    }
+
+    /* Tabs conteúdo */
+    [data-baseweb="tab-panel"] {
+        background-color: transparent !important;
+    }
+
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea,
     .stSelectbox > div > div {
@@ -385,7 +500,9 @@ else:
     nome = st.session_state.nome_user
 
     st.markdown(f"<h1 style='text-align:center'>🔮 TENDA DO RAVENGAR</h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align:center;color:#C4B5D4'>✦ Boas-vindas, <b style='color:#D4AF37'>{nome}</b> · {len(mural_global)} almas no Mural ✦</p>", unsafe_allow_html=True)
+    qtd_almas = len(mural_global)
+    texto_almas = f"{qtd_almas} almas" if qtd_almas > 0 else "nenhuma alma"
+    st.markdown(f"<p style='text-align:center;color:#C4B5D4'>✦ Boas-vindas, <b style='color:#D4AF37'>{nome}</b> · {texto_almas} no Mural ✦</p>", unsafe_allow_html=True)
 
     tabs = st.tabs([
         "🔮 Oráculo",
