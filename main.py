@@ -206,12 +206,14 @@ st.markdown(f"""
 
 # --- SOM AMBIENTE ---
 with st.expander("🎵 Som Ambiente Místico (ativar/desativar)"):
-    st.markdown("""
-    <audio autoplay loop controls style="width:100%;margin-top:8px;">
-      <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3" type="audio/mpeg">
-    </audio>
-    <p style="font-size:0.78em;color:#aaa;margin-top:6px;">🔇 Clique em pause para silenciar</p>
-    """, unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.88em;color:#888;margin-bottom:6px;'>Clique em ▶ para tocar. Ative o loop manualmente se desejar repetir.</p>", unsafe_allow_html=True)
+    SONS = {
+        "🌙 Atmosfera Mística": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "🌊 Sons da Natureza": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        "🔮 Ambient Profundo": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    }
+    som_escolhido = st.selectbox("Escolha o som:", list(SONS.keys()), key="select_som_ambiente", label_visibility="collapsed")
+    st.audio(SONS[som_escolhido], format="audio/mp3")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
