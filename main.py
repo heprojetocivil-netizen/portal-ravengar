@@ -67,7 +67,10 @@ st.markdown("""
         margin-bottom: 24px;
         box-shadow: 0 4px 24px rgba(180,0,180,0.2);
     }
-    .boas-vindas-box * { color: #FFD1DC !important; }
+    .stApp .boas-vindas-box, .stApp .boas-vindas-box p,
+    .stApp .boas-vindas-box span, .stApp .boas-vindas-box div,
+    .stApp .boas-vindas-box h1, .stApp .boas-vindas-box h2,
+    .stApp .boas-vindas-box h3 { color: #FFD1DC !important; }
     .boas-vindas-hora { font-size: 0.82em; opacity: 0.65; margin-bottom: 8px; letter-spacing: 1px; }
     .boas-vindas-frase { font-size: 1.05em; font-style: italic; line-height: 1.7; }
 
@@ -81,7 +84,10 @@ st.markdown("""
         max-width: 380px;
         box-shadow: 0 6px 28px rgba(155,89,182,0.3);
     }
-    .runa-card * { color: #DDA0DD !important; }
+    .stApp .runa-card, .stApp .runa-card p,
+    .stApp .runa-card span, .stApp .runa-card div,
+    .stApp .runa-card h1, .stApp .runa-card h2,
+    .stApp .runa-card h3 { color: #DDA0DD !important; }
     .runa-simbolo { font-size: 4em; margin: 8px 0; }
     .runa-nome { font-size: 1.4em; font-weight: bold; }
 
@@ -92,7 +98,10 @@ st.markdown("""
         padding: 22px;
         margin-bottom: 16px;
     }
-    .astral-box * { color: #CCCCFF !important; }
+    .stApp .astral-box, .stApp .astral-box p,
+    .stApp .astral-box span, .stApp .astral-box div,
+    .stApp .astral-box h1, .stApp .astral-box h2,
+    .stApp .astral-box h3 { color: #CCCCFF !important; }
 
     .numero-box {
         background: linear-gradient(135deg, #1A0A00, #2D1500);
@@ -102,8 +111,16 @@ st.markdown("""
         text-align: center;
         margin: 10px 0;
     }
-    .numero-box * { color: #FFD700 !important; }
+    .stApp .numero-box, .stApp .numero-box p,
+    .stApp .numero-box span, .stApp .numero-box div,
+    .stApp .numero-box h1, .stApp .numero-box h2,
+    .stApp .numero-box h3 { color: #FFD700 !important; }
     .numero-grande { font-size: 3.5em; font-weight: bold; }
+
+    .stApp .tarot-card, .stApp .tarot-card p,
+    .stApp .tarot-card span, .stApp .tarot-card div,
+    .stApp .tarot-card h1, .stApp .tarot-card h2,
+    .stApp .tarot-card h3 { color: #FFD1DC !important; }
     </style>
 """, unsafe_allow_html=True)
 
