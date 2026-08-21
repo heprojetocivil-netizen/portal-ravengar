@@ -10,162 +10,80 @@ st.set_page_config(page_title="Tenda do Ravengar", page_icon="🔮", layout="wid
 
 st.markdown("""
     <style>
-    header {visibility: hidden;}
-    .stApp { background-color: #F7F7F7 !important; }
-    .stApp p, .stApp span, .stApp label, h1, h2, h3 { color: #000000 !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    div.stButton > button, div.stFormSubmitButton > button {
-        background-color: #FFD1DC !important;
-        color: #000000 !important;
-        font-weight: bold !important;
-        border: 1px solid #FFB7C5 !important;
-        border-radius: 12px !important;
-        width: 100%;
-        transition: 0.3s;
+    .stApp { background-color:#F6FBF4; font-family:'Inter',sans-serif; }
+    [data-testid="stSidebar"] { display:none; }
+
+    .stTextInput>div>div>input, .stTextArea>div>textarea,
+    .stSelectbox>div>div>div, .stNumberInput>div>div>input {
+        background-color:#FFFFFF !important; color:#1A1A2E !important;
+        border:1px solid #CED4DA !important; font-family:'Inter',sans-serif !important;
     }
 
-    .ravengar-card {
-        background-color: #FFFFFF !important;
-        border: 2px solid #FFD1DC !important;
-        padding: 25px;
-        border-radius: 15px;
-        color: #000000 !important;
-        margin-bottom: 20px;
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.05);
+    .stButton>button {
+        width:100%; border-radius:10px; height:3.2em;
+        background:linear-gradient(135deg,#16A34A,#15803D) !important; color:white !important;
+        font-weight:600; border:none; box-shadow:2px 2px 8px rgba(0,0,0,0.1);
+        font-family:'Inter',sans-serif !important; transition:all 0.2s ease;
     }
+    .stButton>button:hover { background:linear-gradient(135deg,#15803D,#166534) !important; transform:translateY(-1px); }
+    .stApp .stButton>button, .stApp .stButton>button p,
+    .stApp .stButton>button span, .stApp .stButton>button div { color:white !important; }
 
-    .tarot-card {
-        background: linear-gradient(135deg, #2D0036, #6B006B);
-        border: 3px solid #FFD1DC;
-        padding: 30px;
-        border-radius: 20px;
-        text-align: center;
-        margin: 20px auto;
-        max-width: 420px;
-        box-shadow: 0 8px 32px rgba(180,0,180,0.25);
-    }
-    .tarot-card * { color: #FFD1DC !important; }
-    .tarot-titulo { font-size: 1.6em; font-weight: bold; margin-bottom: 6px; }
-    .tarot-simbolo { font-size: 3.5em; margin: 10px 0; }
+    .stApp h1, .stApp h2, .stApp h3 { color:#14532D !important; font-family:'Inter',sans-serif !important; font-weight:700 !important; }
 
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-    .stTabs [data-baseweb="tab-active"] { border-bottom: 3px solid #FFD1DC !important; }
+    .card { background:linear-gradient(135deg,#F0FDF4,#DCFCE7); padding:20px; border-radius:14px; border:1px solid #86EFAC; margin-bottom:14px; white-space:normal; word-wrap:break-word; }
+    .stApp .card, .stApp .card p, .stApp .card span, .stApp .card div, .stApp .card strong, .stApp .card em { color:#14532D !important; }
 
-    .rodape-ravengar {
-        text-align: center;
-        padding: 24px 0 8px 0;
-        font-size: 0.88em;
-        color: #888 !important;
-        border-top: 1px solid #FFD1DC;
-        margin-top: 40px;
-    }
+    .card-dark { background:linear-gradient(135deg,#DCFCE7,#D1FAE5); padding:20px; border-radius:14px; border:1px solid #6EE7B7; margin-bottom:14px; white-space:normal; word-wrap:break-word; }
+    .stApp .card-dark, .stApp .card-dark p, .stApp .card-dark span, .stApp .card-dark div, .stApp .card-dark strong { color:#14532D !important; }
 
-    .boas-vindas-box {
-        background: linear-gradient(135deg, #1a001a, #2D0036);
-        border: 2px solid #FFD1DC;
-        border-radius: 16px;
-        padding: 22px 28px;
-        text-align: center;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 24px rgba(180,0,180,0.2);
-    }
-    .stApp .boas-vindas-box, .stApp .boas-vindas-box p,
-    .stApp .boas-vindas-box span, .stApp .boas-vindas-box div,
-    .stApp .boas-vindas-box h1, .stApp .boas-vindas-box h2,
-    .stApp .boas-vindas-box h3 { color: #FFD1DC !important; }
-    .boas-vindas-hora { font-size: 0.82em; opacity: 0.65; margin-bottom: 8px; letter-spacing: 1px; }
-    .boas-vindas-frase { font-size: 1.05em; font-style: italic; line-height: 1.7; }
+    .card-green { background:linear-gradient(135deg,#DCFCE7,#BBF7D0); padding:20px; border-radius:14px; border:1px solid #4ADE80; margin-bottom:14px; white-space:normal; word-wrap:break-word; }
+    .stApp .card-green, .stApp .card-green p, .stApp .card-green span, .stApp .card-green div { color:#14532D !important; }
 
-    .runa-card {
-        background: linear-gradient(135deg, #0D0D1A, #1A0026);
-        border: 2px solid #9B59B6;
-        border-radius: 16px;
-        padding: 26px;
-        text-align: center;
-        margin: 16px auto;
-        max-width: 380px;
-        box-shadow: 0 6px 28px rgba(155,89,182,0.3);
-    }
-    .stApp .runa-card, .stApp .runa-card p,
-    .stApp .runa-card span, .stApp .runa-card div,
-    .stApp .runa-card h1, .stApp .runa-card h2,
-    .stApp .runa-card h3 { color: #DDA0DD !important; }
-    .runa-simbolo { font-size: 4em; margin: 8px 0; }
-    .runa-nome { font-size: 1.4em; font-weight: bold; }
+    .card-blue { background:linear-gradient(135deg,#EFF6FF,#DBEAFE); padding:20px; border-radius:14px; border:1px solid #93C5FD; margin-bottom:14px; white-space:normal; word-wrap:break-word; }
+    .stApp .card-blue, .stApp .card-blue p, .stApp .card-blue span, .stApp .card-blue div { color:#1E3A8A !important; }
 
-    .astral-box {
-        background: linear-gradient(135deg, #0A0A1F, #0D001A);
-        border: 2px solid #6666FF;
-        border-radius: 16px;
-        padding: 22px;
-        margin-bottom: 16px;
-    }
-    .stApp .astral-box, .stApp .astral-box p,
-    .stApp .astral-box span, .stApp .astral-box div,
-    .stApp .astral-box h1, .stApp .astral-box h2,
-    .stApp .astral-box h3 { color: #CCCCFF !important; }
+    .card-red { background:linear-gradient(135deg,#FFF5F5,#FEE2E2); padding:20px; border-radius:14px; border:1px solid #FECACA; margin-bottom:14px; white-space:normal; word-wrap:break-word; }
+    .stApp .card-red, .stApp .card-red p, .stApp .card-red span, .stApp .card-red div { color:#7F1D1D !important; }
 
-    .numero-box {
-        background: linear-gradient(135deg, #1A0A00, #2D1500);
-        border: 2px solid #FFD700;
-        border-radius: 16px;
-        padding: 20px;
-        text-align: center;
-        margin: 10px 0;
-    }
-    .stApp .numero-box, .stApp .numero-box p,
-    .stApp .numero-box span, .stApp .numero-box div,
-    .stApp .numero-box h1, .stApp .numero-box h2,
-    .stApp .numero-box h3 { color: #FFD700 !important; }
-    .numero-grande { font-size: 3.5em; font-weight: bold; }
+    .card-yellow { background:linear-gradient(135deg,#FFFBEB,#FEF3C7); padding:18px; border-radius:12px; border:1px solid #FCD34D; margin-bottom:12px; white-space:normal; word-wrap:break-word; }
+    .stApp .card-yellow, .stApp .card-yellow p, .stApp .card-yellow span, .stApp .card-yellow div { color:#78350F !important; }
 
-    .stApp .tarot-card, .stApp .tarot-card p,
-    .stApp .tarot-card span, .stApp .tarot-card div,
-    .stApp .tarot-card h1, .stApp .tarot-card h2,
-    .stApp .tarot-card h3 { color: #FFD1DC !important; }
+    .stat-box { background:#FFFFFF; border-radius:12px; padding:16px; text-align:center; border:1px solid #86EFAC; }
+    .stApp .stat-box div, .stApp .stat-box span, .stApp .stat-box p { color:#14532D !important; }
+    .stApp .stat-numero, .stat-numero { font-size:2em; font-weight:700; color:#166534 !important; }
 
-    .curso-card {
-        background: linear-gradient(135deg, #1A001A, #2D0036);
-        border: 2px solid #FFD1DC;
-        border-radius: 16px;
-        padding: 20px;
-        text-align: center;
-        margin-bottom: 12px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-    .stApp .curso-card, .stApp .curso-card p,
-    .stApp .curso-card span, .stApp .curso-card div,
-    .stApp .curso-card h1, .stApp .curso-card h2,
-    .stApp .curso-card h3 { color: #FFD1DC !important; }
+    .hist-item { background:#FFFFFF; border-radius:10px; padding:12px 16px; margin-bottom:8px; border-left:4px solid #86EFAC; }
+    .stApp .hist-item, .stApp .hist-item p, .stApp .hist-item span, .stApp .hist-item div, .stApp .hist-item small { color:#14532D !important; }
 
-    .aula-conteudo {
-        background-color: #FFFFFF;
-        border: 2px solid #FFD1DC;
-        border-radius: 15px;
-        padding: 28px;
-        margin-bottom: 16px;
-        color: #1A1A1A;
-        line-height: 1.9;
-        font-size: 1.02em;
-    }
-    .aula-secao {
-        background-color: #FFF0F5;
-        border-left: 4px solid #C2185B;
-        border-radius: 0 10px 10px 0;
-        padding: 16px 20px;
-        margin: 14px 0;
-        color: #1A1A1A;
-    }
-    .progresso-curso {
-        background: linear-gradient(135deg, #2D0036, #6B006B);
-        border-radius: 12px;
-        padding: 14px 20px;
-        margin-bottom: 16px;
-        text-align: center;
-    }
-    .stApp .progresso-curso, .stApp .progresso-curso p,
-    .stApp .progresso-curso span, .stApp .progresso-curso div { color: #FFD1DC !important; }
+    .badge { background:#166534; color:white !important; padding:4px 12px; border-radius:20px; font-size:0.78em; font-weight:600; display:inline-block; margin:2px; }
+    .badge-verde { background:#059669; color:white !important; padding:4px 12px; border-radius:20px; font-size:0.78em; font-weight:600; display:inline-block; margin:2px; }
+    .badge-amarelo { background:#B45309; color:white !important; padding:4px 12px; border-radius:20px; font-size:0.78em; font-weight:600; display:inline-block; margin:2px; }
+    .badge-azul { background:#1D4ED8; color:white !important; padding:4px 12px; border-radius:20px; font-size:0.78em; font-weight:600; display:inline-block; margin:2px; }
+    .badge-roxo { background:#6D28D9; color:white !important; padding:4px 12px; border-radius:20px; font-size:0.78em; font-weight:600; display:inline-block; margin:2px; }
+
+    .divider { border:none; height:1px; background:linear-gradient(to right,transparent,#86EFAC,transparent); margin:18px 0; }
+
+    .chat-user { background:#FFFFFF; border:1px solid #86EFAC; border-radius:12px 12px 4px 12px; padding:12px 16px; margin:8px 0; }
+    .stApp .chat-user, .stApp .chat-user p, .stApp .chat-user span, .stApp .chat-user div { color:#14532D !important; }
+
+    .chat-persona { background:#F6FBF4; border:1px solid #86EFAC; border-radius:4px 12px 12px 12px; padding:12px 16px; margin:8px 0; }
+    .stApp .chat-persona, .stApp .chat-persona p, .stApp .chat-persona span, .stApp .chat-persona div { color:#14532D !important; }
+
+    .questao-box { background:#FFFFFF; border:2px solid #86EFAC; border-radius:12px; padding:18px; margin-bottom:14px; }
+    .stApp .questao-box, .stApp .questao-box p, .stApp .questao-box span, .stApp .questao-box div { color:#14532D !important; }
+
+    .avaliacao-box { background:#FFFFFF; border:2px solid #86EFAC; border-radius:14px; padding:18px; margin-bottom:12px; }
+    .stApp .avaliacao-box, .stApp .avaliacao-box p, .stApp .avaliacao-box span, .stApp .avaliacao-box div { color:#14532D !important; }
+
+    .meta-box { background:#FFFFFF; border:2px solid #86EFAC; border-radius:12px; padding:16px; text-align:center; margin:10px 0; }
+    .stApp .meta-box, .stApp .meta-box div, .stApp .meta-box span { color:#14532D !important; }
+    .stApp .meta-numero { font-size:2em; font-weight:700; color:#166534 !important; }
+
+    .chat-scroll-container { max-height:40vh; overflow-y:auto; display:flex; flex-direction:column; scroll-behavior:smooth; padding-bottom:4px; }
+    .chat-scroll-container > * { flex-shrink:0; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -563,7 +481,7 @@ def consultar_ravengar(sistema, pergunta, api_key):
         client = Groq(api_key=api_key)
         completion = client.chat.completions.create(
             messages=[{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
         )
         return completion.choices[0].message.content
     except Exception as e:
@@ -573,10 +491,8 @@ def consultar_ravengar(sistema, pergunta, api_key):
 if 'chave_api' not in st.session_state or not st.session_state.chave_api:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown("<h1 style='text-align:center;'>🔮 Tenda do Ravengar</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align:center;color:#888;'>Mistérios da Mente e do Destino</p>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("""
         <div style='background:#FFF0F5;border:1px solid #FFB7C5;border-radius:12px;
         padding:14px 18px;margin-bottom:20px;font-size:0.9em;color:#000;line-height:1.8;text-align:center;'>
@@ -593,7 +509,6 @@ if 'chave_api' not in st.session_state or not st.session_state.chave_api:
                 st.rerun()
             else:
                 st.error("Por favor, insira sua chave API antes de entrar.")
-        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("<p style='text-align:center;font-size:0.8em;color:#aaa;'>Não tem uma chave? Crie grátis em <a href='https://console.groq.com/keys' target='_blank' style='color:#C2185B;'>console.groq.com/keys</a></p>", unsafe_allow_html=True)
     st.stop()
 
@@ -648,7 +563,6 @@ with st.expander("🎵 Som Ambiente Místico (ativar/desativar)"):
     som_escolhido = st.selectbox("Escolha o som:", list(SONS.keys()), key="select_som_ambiente", label_visibility="collapsed")
     st.audio(SONS[som_escolhido], format="audio/mp3")
 
-st.markdown("<br>", unsafe_allow_html=True)
 
 # --- ABAS ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13 = st.tabs([
@@ -1153,7 +1067,6 @@ with tab13:
 
         # --- TELA: LISTA DE CURSOS ---
         if st.session_state.curso_ativo is None:
-            st.markdown("<br>", unsafe_allow_html=True)
             cols = st.columns(3)
             for idx, (chave, curso) in enumerate(CURSOS.items()):
                 col = cols[idx % 3]
@@ -1199,7 +1112,6 @@ with tab13:
             """, unsafe_allow_html=True)
             st.progress(pct / 100)
 
-            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("### 📋 Aulas do Curso")
 
             for num, aula in curso['aulas'].items():
